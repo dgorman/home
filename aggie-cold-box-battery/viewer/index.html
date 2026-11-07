@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aggie Cold Box · 12V 10Ah Battery Enclosure</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #e9edf1;
+    --fg: #16202b;
+    --muted: #5d6b7a;
+    --panel: #f7f9fbd9;
+    --line: #c9d2db;
+    --accent: #1d4ed8;
+    --print: #d9541f;
+    --font-ui: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    --font-num: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #12171d; --fg: #e6ebf0; --muted: #96a3b1; --panel: #1b222ad9; --line: #2e3842; --accent: #6b9bff; --print: #ff7a3d; color-scheme: dark; } }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 14px/1.45 var(--font-ui); }
+  #c { position: fixed; inset: 0; display: block; width: 100%; height: 100%; }
+  #hud { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; padding: 12px 16px 0; display: flex; gap: 10px; justify-content: space-between; align-items: flex-start; pointer-events: none; }
+  .panel { background: var(--panel); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; pointer-events: auto; min-width: 0; }
+  #controls { max-width: 370px; }
+  #side { max-width: 320px; }
+  h1 { font-size: 15px; font-weight: 600; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .muted { color: var(--muted); font-size: 12.5px; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  button { font: inherit; font-size: 13px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; }
+  button:hover, button:focus-visible { border-color: var(--accent); outline: none; }
+  button.primary { border-color: var(--accent); color: var(--accent); font-weight: 500; }
+  label { display: flex; align-items: center; gap: 8px; font-size: 13px; margin: 2px 0; cursor: pointer; }
+  .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; border: 1px solid #0003; flex: none; }
+  .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 10px 0 4px; }
+  .eyebrow:first-child { margin-top: 0; }
+  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 12.5px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+  #status { position: fixed; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); left: 16px; right: 16px; font-size: 12px; color: var(--muted); font-family: var(--font-num); }
+  @media (max-width: 700px) {
+    #hud { flex-direction: column; }
+    #controls, #side { max-width: none; width: auto; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div class="panel" id="controls">
+    <h1>Aggie Cold Box · 12V 10Ah Battery Box</h1>
+    <div class="muted">Weatherproof 3D-printed enclosure for Mighty Max ML10-12 (12V 10Ah) with 8° snow-shed overhang lid, undercut drip groove, 42 mm wire-stuffing bay &amp; 2× 10AWG actuator wire gland.</div>
+    <div class="row">
+      <button data-view="iso">Iso</button>
+      <button data-view="front">Front</button>
+      <button data-view="gland">Gland side</button>
+      <button data-view="top">Top</button>
+      <button data-view="back">Planter back</button>
+      <button id="lift-lid" class="primary">Lift lid</button>
+      <label style="margin:0 0 0 4px"><input type="checkbox" id="dims" checked> Dimensions</label>
+    </div>
+  </div>
+  <div class="panel" id="side">
+    <details open>
+      <summary class="eyebrow" style="cursor:pointer">Components</summary>
+      <div id="legend"></div>
+    </details>
+    <div class="eyebrow">Key Specifications</div>
+    <dl>
+      <dt>Battery</dt><dd>Mighty Max ML10-12 (151 × 65 × 119 mm)</dd>
+      <dt>Main Box</dt><dd>209 × 77 × 162 mm (249 mm w/ flanges)</dd>
+      <dt>Overhang Lid</dt><dd>233 × 94 × 42 mm (8° slope, +12/14 mm eaves)</dd>
+      <dt>Wire Bay</dt><dd>42 × 67 × 157 mm side + 35 mm overhead</dd>
+      <dt>Wire Gland</dt><dd>2 × 10 AWG (Ø5.2 mm) + 45° rain hood</dd>
+      <dt>Planter Mount</dt><dd>4 × #10 screws (keyholes) + 3 mm standoffs</dd>
+      <dt>Print Bed</dt><dd>Fits Bambu P1P (256²) &amp; H2D (350×320)</dd>
+    </dl>
+  </div>
+</div>
+<div id="status">Loading 3D assembly…</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+const isDark = () => matchMedia('(prefers-color-scheme: dark)').matches;
+const applyBg = () => { scene.background = new THREE.Color(isDark() ? 0x12171d : 0xe9edf1); };
+applyBg(); matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyBg);
+
+const camera = new THREE.PerspectiveCamera(36, 1, 1, 10000);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x6f7a86, 1.15));
+const sun = new THREE.DirectionalLight(0xffffff, 1.3); sun.position.set(400, 700, 600); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(-500, 300, -400); scene.add(fill);
+
+const GROUPS = {
+  print_battery_box:        ['Battery Box Enclosure (printed)', 0xd9541f, 1.0],
+  print_overhang_lid:       ['Overhang Drip Lid (printed)',     0x38424d, 0.72],
+  print_wire_gland_cap:     ['2× 10AWG Gland Cap (printed)',    0xf27441, 1.0],
+  battery_mightymax_12v10ah:['Mighty Max 12V 10Ah (ML10-12)',   0x26292e, 1.0],
+  terminal_pos_f2:          ['F2 Spade Terminals (+ / -)',      0xdc2626, 1.0],
+  wire_10awg:               ['2× 10 AWG Actuator Leads',        0xdc2626, 1.0],
+  planter_cedar_wall:       ['Aggie Cold Box Cedar Wall',       0xb57845, 0.48],
+};
+
+const legend = document.getElementById('legend');
+const groupObjs = {};
+const groupOn = {};
+for (const [k, [label, col]] of Object.entries(GROUPS)) {
+  groupObjs[k] = []; groupOn[k] = true;
+  const l = document.createElement('label');
+  l.innerHTML = `<input type="checkbox" checked data-g="${k}"><span class="sw" style="background:#${col.toString(16).padStart(6,'0')}"></span>${label}`;
+  l.querySelector('input').addEventListener('change', e => {
+    groupOn[k] = e.target.checked;
+    for (const o of groupObjs[k]) o.visible = groupOn[k];
+  });
+  legend.appendChild(l);
+}
+
+const M = p => new THREE.Vector3(p[0], p[2], p[1]);
+let bbox = new THREE.Box3(), lidMesh = null, lidLifted = false, dimRoot = null;
+
+function labelSprite(text) {
+  const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+  ctx.font = '600 26px "IBM Plex Mono", Menlo, monospace';
+  const w = ctx.measureText(text).width + 22;
+  c.width = Math.ceil(w); c.height = 42;
+  const ctx2 = c.getContext('2d');
+  ctx2.font = '600 26px "IBM Plex Mono", Menlo, monospace';
+  ctx2.fillStyle = isDark() ? 'rgba(27,34,42,0.92)' : 'rgba(255,255,255,0.92)';
+  ctx2.fillRect(0, 0, c.width, c.height);
+  ctx2.fillStyle = isDark() ? '#ffb07a' : '#b3410f';
+  ctx2.textBaseline = 'middle'; ctx2.fillText(text, 11, 21);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
+  sp.scale.set(c.width * 0.35, c.height * 0.35, 1); sp.renderOrder = 10;
+  return sp;
+}
+
+async function init() {
+  const data = await (await fetch('box-master.json')).json();
+  const root = new THREE.Group();
+  for (const part of data.parts) {
+    const geo = new THREE.BufferGeometry();
+    const rawV = part.v;
+    const v3 = new Float32Array(rawV.length);
+    for (let i = 0; i < rawV.length; i += 3) {
+      v3[i] = rawV[i];
+      v3[i + 1] = rawV[i + 2];
+      v3[i + 2] = rawV[i + 1];
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(v3, 3));
+    geo.setIndex(part.i);
+    geo.computeVertexNormals();
+
+    let gKey = part.name;
+    if (gKey === 'terminal_neg_f2') gKey = 'terminal_pos_f2';
+    if (gKey.startsWith('wire_10awg')) gKey = 'wire_10awg';
+    const [, defaultCol, op] = GROUPS[gKey] || ['Part', 0xd9541f, 1.0];
+    const col = (part.name === 'terminal_neg_f2' || part.name === 'wire_10awg_neg') ? 0x1e2229 : defaultCol;
+
+    const mat = new THREE.MeshStandardMaterial({
+      color: col, roughness: 0.55, metalness: 0.08,
+      transparent: op < 1, opacity: op, depthWrite: op >= 1, side: THREE.DoubleSide
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.name = part.name;
+    if (part.name === 'print_overhang_lid') lidMesh = mesh;
+    if (groupObjs[gKey]) groupObjs[gKey].push(mesh);
+    root.add(mesh);
+  }
+  scene.add(root);
+  bbox.setFromObject(root);
+  setView('iso');
+
+  const dims = await (await fetch('dims-master.json')).json();
+  dimRoot = new THREE.Group();
+  const lmat = new THREE.LineBasicMaterial({ color: isDark() ? 0xffb07a : 0xb3410f, depthTest: false, transparent: true });
+  for (const d of dims) {
+    const a = M(d.a), b = M(d.b), off = M(d.off);
+    const a2 = a.clone().add(off), b2 = b.clone().add(off);
+    const geo = new THREE.BufferGeometry().setFromPoints([a, a2, a2, b2, b2, b]);
+    dimRoot.add(new THREE.LineSegments(geo, lmat));
+    const sp = labelSprite(d.label);
+    sp.position.copy(a2.clone().add(b2).multiplyScalar(0.5));
+    dimRoot.add(sp);
+  }
+  scene.add(dimRoot);
+  document.getElementById('status').textContent = 'Aggie Cold Box 12V 10Ah Battery Enclosure · 0 clashes · units mm';
+}
+
+function setView(v) {
+  const c = bbox.getCenter(new THREE.Vector3()); const s = bbox.getSize(new THREE.Vector3()); const r = s.length() * 0.95;
+  const d = {
+    iso: [0.85, 0.65, 0.95],
+    front: [0.001, 0.15, 1.1],
+    gland: [1.1, 0.25, 0.35],
+    top: [0.001, 1.2, 0.001],
+    back: [-0.2, 0.2, -1.1]
+  }[v];
+  camera.position.set(c.x + d[0] * r, c.y + d[1] * r, c.z + d[2] * r);
+  controls.target.copy(c); controls.update();
+}
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+document.getElementById('dims').addEventListener('change', e => { if (dimRoot) dimRoot.visible = e.target.checked; });
+document.getElementById('lift-lid').addEventListener('click', e => {
+  lidLifted = !lidLifted;
+  e.target.textContent = lidLifted ? 'Seat lid' : 'Lift lid';
+});
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+init();
+
+(function loop() {
+  requestAnimationFrame(loop);
+  if (lidMesh) {
+    const targetY = lidLifted ? 95 : 0;
+    lidMesh.position.y += (targetY - lidMesh.position.y) * 0.1;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+})();
+</script>
+</body>
+</html>

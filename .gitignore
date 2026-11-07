@@ -1,0 +1,20 @@
+# Python & Virtual Environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# CAD Scratch / Intermediate Build Outputs
+**/cad/out/
+
+# macOS & Editor Files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.env
+.env.*

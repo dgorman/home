@@ -1,0 +1,10 @@
+{
+	"autodeskProduct": "Fusion",
+	"type": "script",
+	"author": "Dan Gorman",
+	"description": {
+		"": "Aggie Cold Box 12V 10Ah (Mighty Max ML10-12) Weatherproof Battery Enclosure, Overhang Drip Lid & 2x 10AWG Actuator Wire Gland Parametric Generator"
+	},
+	"supportedOS": "windows|mac",
+	"editEnabled": true
+}
