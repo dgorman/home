@@ -82,16 +82,12 @@ SPLASH_LIP_H_Z: float = 8.0         # 8.0 mm tall raised inner labyrinth splash 
 SPLASH_LIP_STEP: float = 2.2        # 2.2 mm outer step-in (lip thickness = 2.8 mm)
 BOX_TOTAL_H_Z: float = BOX_SHOULDER_Z + SPLASH_LIP_H_Z                            # 160.0 mm
 
-# Under-Battery Support Gussets & Extended Lower Mounting Flange (Z = -45.0 .. 0.0 mm)
-UNDER_GUSSET_H_Z: float = 45.0      # Extends 45.0 mm below the Z = 0.0 floor (down to Z = -45.0 mm)
-UNDER_GUSSET_T_X: float = 6.0       # 6.0 mm thick structural gusset ribs
-UNDER_GUSSET_FOOT_Y: float = 32.0   # Flat foot from Y = -3.0 to Y = 32.0 at Z = -45.0, then 45-deg slope to (Y = 77.0, Z = 0.0)
+# Under-Box Left & Right Support Gussets & Extended Lower Mounting Flanges (Z = -40.0 .. 0.0 mm)
+UNDER_GUSSET_H_Z: float = 40.0      # Extends 40.0 mm below the Z = 0.0 floor (down to Z = -40.0 mm)
+UNDER_GUSSET_T_X: float = 8.0       # 8.0 mm thick Left & Right end gussets (X = 0..8 and X = 201..209)
 GUSSET_X_POSITIONS: tuple[float, ...] = (
-    0.0,                            # Left outer wall gusset (X = 0..6)
-    51.0,                           # Under-battery left-center gusset (X = 51..57)
-    103.0,                          # Under-battery right-center gusset (X = 103..109)
-    156.0,                          # Under battery divider wall gusset (X = 156..162)
-    BOX_WIDTH_X - UNDER_GUSSET_T_X, # Right outer wall gusset (X = 203..209)
+    0.0,                            # Left end under-box gusset (X = 0..8 mm)
+    BOX_WIDTH_X - UNDER_GUSSET_T_X, # Right end under-box gusset (X = 201..209 mm)
 )
 
 # Rear Planter-Wall Drainage Standoffs & Extended Side/Lower Mounting Flanges
@@ -101,11 +97,11 @@ STANDOFF_TOP_Z: float = 136.0       # Ends 2.0 mm below lid skirt (Z = 138.0)
 
 FLANGE_W_X: float = 20.0            # 20.0 mm wide left/right mounting ears (X = -20..0, 209..229)
 FLANGE_T_Y: float = STANDOFF_DEPTH_Y + WALL_T  # 8.0 mm thick solid flange (Y = -3.0 .. 5.0)
-FLANGE_Z0: float = -UNDER_GUSSET_H_Z           # -45.0 mm (extends 45 mm below box floor!)
-FLANGE_TOP_Z: float = 130.0         # Z = -45.0 .. +130.0 mm (175.0 mm total vertical span)
+FLANGE_Z0: float = -UNDER_GUSSET_H_Z           # -40.0 mm (extends 40 mm below box floor alongside the 2 gussets!)
+FLANGE_TOP_Z: float = 130.0         # Z = -40.0 .. +130.0 mm (170.0 mm total vertical span)
 SCREW_CLEAR_DIA: float = 5.2        # #10 stainless wood screw clearance (mm)
 SCREW_CBORE_DIA: float = 10.5       # Washer/pan-head counterbore & keyhole entry diameter
-SCREW_LOWER_Z: float = -26.0        # Extended down below the battery floor (Z = -26.0 mm) for direct support!
+SCREW_LOWER_Z: float = -24.0        # Extended down below the battery floor (Z = -24.0 mm) next to the 2 gussets
 SCREW_UPPER_Z: float = 105.0        # Upper keyhole screw elevation
 
 # Fastener & Heat-Set Insert Specs (for Overhang Lid side lock screws)
@@ -115,12 +111,12 @@ M4_INSERT_BORE_DIA: float = 5.6     # McMaster 94180A353 M4 tapered heat-set ins
 LID_M4_Z: float = 145.0             # Side M4 lid locking screw elevation
 LID_M4_Y: float = 38.5              # Centered on box depth (77.0 / 2)
 
-# Direct 2x 10 AWG Wire Exit Holes through Right Wall (No external gland boss or hood)
-WIRE_10AWG_OD: float = 5.0          # Insulated 10 AWG wire jacket OD
-WIRE_HOLE_DIA: float = 5.8          # Clean 5.8 mm pass-through holes in right wall
-WIRE_EXIT_CENTER_Y: float = 44.0    # Centered in wiring bay depth
-WIRE_EXIT_CENTER_Z: float = 26.0    # Low on right wall of wiring bay
-WIRE_EXIT_SPAN_Y: float = 14.0      # Wire centers at Y = 37.0 and Y = 51.0 mm
+# Dual Large 2x 10 AWG Wire Holes through Right Wall (Primary Hole + Spare Hole of Same Size)
+WIRE_10AWG_OD: float = 4.8          # Insulated 10 AWG wire jacket OD (~4.8 mm)
+WIRE_GLAND_HOLE_DIA: float = 12.5   # Large 12.5 mm (~1/2") hole sized to take 2x 10 AWG wires together
+WIRE_HOLE_PRIMARY_Y: float = 27.0   # Primary 2x 10 AWG hole Y center (mm)
+WIRE_HOLE_SPARE_Y: float = 51.0     # Spare 2x 10 AWG hole Y center right next to it (24.0 mm spacing)
+WIRE_EXIT_CENTER_Z: float = 28.0    # Low on right wall of wiring bay (Z = 28.0 mm)
 
 # Weatherproof Overhang Lid (Sloped Shed Roof + Parallel Ceiling + Eaves + Undercut Drip Groove)
 LID_OVERHANG_SIDE_X: float = 12.0   # 12.0 mm overhang left (X = -12.0) and right (X = 221.0)
@@ -237,61 +233,24 @@ def build_battery_box() -> cq.Workplane:
         )
         box = box.union(bridge.cut(slot))
 
-    # 7. Under-Battery Support Structure (Z = -45.0 .. 0.0 mm):
-    #    Start with the full-width 45-deg under-floor hull block (X: 0..209, Y: -3..77, Z: -45..0),
-    #    then carve 45-deg gabled corbel arches between the 5 heavy 6.0 mm gusset ribs so:
-    #      (a) 5 full-depth triangular gussets brace the battery floor all the way to Y = 77 mm
-    #      (b) An 8.0 mm thick lower back mounting apron (Y = -3..5 mm) ties the gussets together
-    #      (c) Every underside surface is <= 45 deg so the entire box prints upright with ZERO supports!
-    under_hull_pts = [
+    # 7. Two Under-Box Support Gussets (Left at X = 0..8 mm, Right at X = 201..209 mm, Z = -40.0 .. 0.0 mm):
+    #    Clean triangular support brackets under the left and right ends of the box floor, tied directly
+    #    into the extended lower mounting flanges (nothing hanging down across the middle of the floor).
+    gusset_pts = [
         (-STANDOFF_DEPTH_Y, -UNDER_GUSSET_H_Z),
-        (UNDER_GUSSET_FOOT_Y, -UNDER_GUSSET_H_Z),
+        (WALL_T, -UNDER_GUSSET_H_Z),
         (BOX_DEPTH_Y, 0.0),
         (-STANDOFF_DEPTH_Y, 0.0),
     ]
-    under_hull = (
-        cq.Workplane("YZ")
-        .workplane(offset=0.0)
-        .polyline(under_hull_pts)
-        .close()
-        .extrude(BOX_WIDTH_X)
-    )
-
-    # Carve the 4 inter-gusset bays (in front of the Y = 5.0 mm lower back mounting apron) with 45-deg gabled roofs
-    for idx in range(len(GUSSET_X_POSITIONS) - 1):
-        bay_x0 = GUSSET_X_POSITIONS[idx] + UNDER_GUSSET_T_X
-        bay_x1 = GUSSET_X_POSITIONS[idx + 1]
-        bay_xm = 0.5 * (bay_x0 + bay_x1)
-        half_w = 0.5 * (bay_x1 - bay_x0)
-        gable_pts = [
-            (bay_x0, -UNDER_GUSSET_H_Z - 1.0),
-            (bay_x1, -UNDER_GUSSET_H_Z - 1.0),
-            (bay_x1, -half_w),
-            (bay_xm, 0.0),
-            (bay_x0, -half_w),
-        ]
-        bay_cut = (
-            cq.Workplane("XZ")
-            .workplane(offset=-WALL_T)
-            .polyline(gable_pts)
+    for gx0 in GUSSET_X_POSITIONS:
+        gusset = (
+            cq.Workplane("YZ")
+            .workplane(offset=gx0)
+            .polyline(gusset_pts)
             .close()
-            .extrude(-(BOX_DEPTH_Y + 5.0))
+            .extrude(UNDER_GUSSET_T_X)
         )
-        under_hull = under_hull.cut(bay_cut)
-
-    # Carve rear drainage channels (Y = -3.0 .. 0.0 mm) between the 4 rear standoff ribs down through Z = -45..0
-    # Standoff ribs are at X = 5..15, 70..80, 129..139, 194..204 mm
-    for cx0, cx1 in ((0.0, 5.0), (15.0, 70.0), (80.0, 129.0), (139.0, 194.0), (204.0, 209.0)):
-        rear_chan = (
-            cq.Workplane("XY")
-            .workplane(offset=-UNDER_GUSSET_H_Z - 1.0)
-            .moveTo(0.5 * (cx0 + cx1), -STANDOFF_DEPTH_Y / 2.0)
-            .rect(cx1 - cx0, STANDOFF_DEPTH_Y)
-            .extrude(UNDER_GUSSET_H_Z + 2.0)
-        )
-        under_hull = under_hull.cut(rear_chan)
-
-    box = box.union(under_hull)
+        box = box.union(gusset)
 
     # 8. 4x Rear Planter-Wall Drainage Standoff Ribs on upper box (Y: -3..0, Z: 0..136, width 10 mm)
     for sx in (10.0, 75.0, 134.0, 199.0):
@@ -304,8 +263,8 @@ def build_battery_box() -> cq.Workplane:
         )
         box = box.union(srib)
 
-    # 9. Left & Right Extended Planter Mounting Flanges (X: -20..0 and 209..229, Y: -3..5, Z: -45..130)
-    for side_sign, fx_center, wall_x in ((-1.0, -FLANGE_W_X / 2.0, 0.0), (+1.0, BOX_WIDTH_X + FLANGE_W_X / 2.0, BOX_WIDTH_X)):
+    # 9. Left & Right Extended Planter Mounting Flanges (X: -20..0 and 209..229, Y: -3..5, Z: -40..130)
+    for fx_center in (-FLANGE_W_X / 2.0, BOX_WIDTH_X + FLANGE_W_X / 2.0):
         flange = (
             cq.Workplane("XY")
             .workplane(offset=FLANGE_Z0)
@@ -315,31 +274,7 @@ def build_battery_box() -> cq.Workplane:
         )
         box = box.union(flange)
 
-        # Bottom gusset on bed (Z = -45..-39) + Mid gusset with 45-deg support-free lower bevel (Z = 50..68)
-        gx0 = wall_x - 12.0 if side_sign < 0 else wall_x
-        bot_gusset = (
-            cq.Workplane("XY")
-            .workplane(offset=FLANGE_Z0)
-            .moveTo(gx0 + 6.0, WALL_T + 6.0)
-            .rect(12.0, 12.0)
-            .extrude(6.0)
-        )
-        mid_g_pts = [
-            (WALL_T, 50.0),
-            (WALL_T + 12.0, 62.0),
-            (WALL_T + 12.0, 68.0),
-            (WALL_T, 68.0),
-        ]
-        mid_gusset = (
-            cq.Workplane("YZ")
-            .workplane(offset=gx0)
-            .polyline(mid_g_pts)
-            .close()
-            .extrude(12.0)
-        )
-        box = box.union(bot_gusset).union(mid_gusset)
-
-        # Lower #10 wood-screw hole extended DOWN below the battery floor (Z = -26.0 mm)
+        # Lower #10 wood-screw hole extended DOWN below the battery floor (Z = -24.0 mm) right next to the left/right gussets
         screw_x = fx_center
         lower_hole = (
             cq.Workplane("XZ")
@@ -395,31 +330,15 @@ def build_battery_box() -> cq.Workplane:
         )
         box = box.cut(kh_shaft).cut(kh_slot).cut(kh_entry).cut(kh_recess).cut(kh_top_cbore)
 
-    # Also add 2x Center Under-Battery #10 Mounting Holes in the lower back apron (at X = 80.0 and X = 132.5, Z = -26.0)
-    for under_sx in (80.0, 132.5):
-        u_hole = (
-            cq.Workplane("XZ")
-            .workplane(offset=STANDOFF_DEPTH_Y + 1.0)
-            .moveTo(under_sx, SCREW_LOWER_Z)
-            .circle(SCREW_CLEAR_DIA / 2.0)
-            .extrude(-(FLANGE_T_Y + 4.0))
-        )
-        u_cbore = (
-            cq.Workplane("XZ")
-            .workplane(offset=-(WALL_T - 2.5))
-            .moveTo(under_sx, SCREW_LOWER_Z)
-            .circle(SCREW_CBORE_DIA / 2.0)
-            .extrude(-5.0)
-        )
-        box = box.cut(u_hole).cut(u_cbore)
-
-    # 10. Cut 2x clean 5.8 mm 10 AWG wire holes directly through the right side wall (no boss or hood)
-    for wy in (WIRE_EXIT_CENTER_Y - WIRE_EXIT_SPAN_Y / 2.0, WIRE_EXIT_CENTER_Y + WIRE_EXIT_SPAN_Y / 2.0):
+    # 10. Cut 2x Large Ø12.5 mm (2x 10 AWG) Wire Gland Holes through the right side wall:
+    #     - Primary Hole at Y = 27.0 mm, Z = 28.0 mm (carries both +12V and GND 10 AWG actuator wires)
+    #     - Spare Hole at Y = 51.0 mm, Z = 28.0 mm (identical Ø12.5 mm hole next to it for a 2nd 2x 10 AWG pair)
+    for wy in (WIRE_HOLE_PRIMARY_Y, WIRE_HOLE_SPARE_Y):
         w_hole = (
             cq.Workplane("YZ")
             .workplane(offset=BOX_WIDTH_X - WALL_T - 1.0)
             .moveTo(wy, WIRE_EXIT_CENTER_Z)
-            .circle(WIRE_HOLE_DIA / 2.0)
+            .circle(WIRE_GLAND_HOLE_DIA / 2.0)
             .extrude(WALL_T + 2.0)
         )
         box = box.cut(w_hole)
@@ -617,9 +536,9 @@ def build_mightymax_battery() -> tuple[cq.Workplane, cq.Workplane, cq.Workplane]
 
 
 def build_actuator_wires() -> tuple[cq.Workplane, cq.Workplane]:
-    """Build the two 10 AWG actuator power leads (+12V Red and GND Black) routing out the right-wall holes."""
-    wy_pos = WIRE_EXIT_CENTER_Y + WIRE_EXIT_SPAN_Y / 2.0  # 51.0 mm
-    wy_neg = WIRE_EXIT_CENTER_Y - WIRE_EXIT_SPAN_Y / 2.0  # 37.0 mm
+    """Build the two 10 AWG actuator power leads (+12V Red and GND Black) exiting together through the primary Ø12.5 mm hole."""
+    wy_pos = WIRE_HOLE_PRIMARY_Y + 2.7  # 29.7 mm (inside the Ø12.5 mm primary hole at Y = 27.0 mm)
+    wy_neg = WIRE_HOLE_PRIMARY_Y - 2.7  # 24.3 mm (inside the Ø12.5 mm primary hole at Y = 27.0 mm)
 
     wire_pos = (
         cq.Workplane("YZ")
@@ -632,7 +551,7 @@ def build_actuator_wires() -> tuple[cq.Workplane, cq.Workplane]:
             .workplane(offset=WIRE_EXIT_CENTER_Z)
             .moveTo(185.0, wy_pos)
             .circle(WIRE_10AWG_OD / 2.0)
-            .extrude(100.0)
+            .extrude(98.0)
         )
         .union(
             cq.Workplane("YZ")
@@ -654,7 +573,7 @@ def build_actuator_wires() -> tuple[cq.Workplane, cq.Workplane]:
             .workplane(offset=WIRE_EXIT_CENTER_Z)
             .moveTo(174.0, wy_neg)
             .circle(WIRE_10AWG_OD / 2.0)
-            .extrude(106.0)
+            .extrude(104.0)
         )
         .union(
             cq.Workplane("YZ")
@@ -825,7 +744,7 @@ def build_viewer_dims() -> list[dict[str, Any]]:
         {
             "a": [0.0, BOX_DEPTH_Y, FLANGE_Z0],
             "b": [0.0, BOX_DEPTH_Y, BOX_TOTAL_H_Z],
-            "label": f"Total Height {BOX_TOTAL_H_Z - FLANGE_Z0:.0f} mm (incl. 45 mm under-battery gussets)",
+            "label": f"Total Height {BOX_TOTAL_H_Z - FLANGE_Z0:.0f} mm (incl. 40 mm left/right gussets)",
             "off": [-32.0, 15.0, 0.0],
         },
         {

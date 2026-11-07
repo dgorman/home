@@ -125,15 +125,15 @@ def render_cross_section(path: str) -> None:
         ax1.add_patch(Polygon([(-23, z0), (-3, z0), (-3, z0 + 70), (-23, z0 + 70)], closed=True, facecolor="#b87a4b", edgecolor="#6e4423", alpha=0.65))
     ax1.text(-13, 60, "Aggie Cold Box\nCedar Wall", ha="center", va="center", fontsize=8.5, color="#4a2c14", rotation=90, fontweight="bold")
 
-    # 3 mm Rear Standoff Rib (Y = -3 .. 0, Z = -45 .. 136)
-    ax1.add_patch(Polygon([(-3, -45), (0, -45), (0, 136), (-3, 136)], closed=True, facecolor="#f07840", edgecolor="#9e3308", hatch="///", alpha=0.7))
+    # 3 mm Rear Standoff Rib (Y = -3 .. 0, Z = 0 .. 136)
+    ax1.add_patch(Polygon([(-3, 0), (0, 0), (0, 136), (-3, 136)], closed=True, facecolor="#f07840", edgecolor="#9e3308", hatch="///", alpha=0.7))
 
-    # Under-Battery Gusset (Y = -3..32..77, Z = -45..0)
-    ax1.add_patch(Polygon([(-3, -45), (32, -45), (77, 0), (-3, 0)], closed=True, facecolor="#ea580c", edgecolor="#7a2606", lw=1.3, alpha=0.85))
-    ax1.text(28, -22, "5× 6 mm Under-Battery\nGussets (45° Slope)", ha="center", va="center", color="white", fontsize=8.0, fontweight="bold")
+    # Left & Right End Under-Box Gussets (Y = -3..5..77, Z = -40..0)
+    ax1.add_patch(Polygon([(-3, -40), (5, -40), (77, 0), (-3, 0)], closed=True, facecolor="#ea580c", edgecolor="#7a2606", lw=1.3, alpha=0.85))
+    ax1.text(24, -15, "2× 8 mm Left/Right\nEnd Gussets", ha="center", va="center", color="white", fontsize=8.0, fontweight="bold")
 
-    # Lower #10 Screw into Cedar Wall at Z = -26 mm
-    ax1.plot([-20, 8], [-26, -26], color="#1e293b", lw=2.6, ls="--")
+    # Lower #10 Screw into Cedar Wall at Z = -24 mm
+    ax1.plot([-20, 8], [-24, -24], color="#1e293b", lw=2.6, ls="--")
 
     # Box Back Wall, Floor, and Front Wall (with Z = 152..160 stepped splash lip)
     box_yz = [
@@ -166,7 +166,7 @@ def render_cross_section(path: str) -> None:
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#1d4ed8"), fontsize=8.5, fontweight="bold", color="#1d4ed8")
     ax1.annotate("8 mm Inner\nLabyrinth Splash Lip", xy=(73.5, 157.0), xytext=(80, 178),
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#b91c1c"), fontsize=8.5, fontweight="bold", color="#b91c1c")
-    ax1.annotate("Lower #10 Screw\n(Z = -26 mm Support)", xy=(0, -26), xytext=(48, -42),
+    ax1.annotate("Lower #10 Screw\n(Z = -24 mm Support)", xy=(0, -24), xytext=(46, -42),
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#7a2606"), fontsize=8.5, fontweight="bold", color="#7a2606")
 
     ax1.set_xlim(-32, 112)
@@ -176,36 +176,26 @@ def render_cross_section(path: str) -> None:
     ax1.set_ylabel("Z Elevation (mm)")
     ax1.grid(True, linestyle=":", alpha=0.4)
 
-    # --- Panel 2: XZ Front Cross-Section (Battery Bay, Wire Stuffing Bay, Under-Battery Gussets & Direct Wire Holes) ---
-    ax2.set_title("B-B Front Cross-Section: Under-Battery Gussets, Extended Mounts & Direct Wire Holes", fontsize=10.5, fontweight="bold", pad=10)
+    # --- Panel 2: XZ Front Cross-Section (Battery Bay, Wire Stuffing Bay, 2x End Gussets & Dual Ø12.5 mm Wire Holes) ---
+    ax2.set_title("B-B Front Cross-Section: 2× Left/Right End Gussets & 2× Ø12.5 mm (2×10AWG) Wire Holes", fontsize=10.5, fontweight="bold", pad=10)
 
-    # Left & Right Mounting Flanges (X = -20..0, 209..229, Z = -45..130)
-    ax2.add_patch(Polygon([(-20, -45), (0, -45), (0, 130), (-20, 130)], closed=True, facecolor="#f07840", edgecolor="#7a2606", alpha=0.65))
-    ax2.add_patch(Polygon([(209, -45), (229, -45), (229, 130), (209, 130)], closed=True, facecolor="#f07840", edgecolor="#7a2606", alpha=0.65))
+    # Left & Right Mounting Flanges (X = -20..0, 209..229, Z = -40..130)
+    ax2.add_patch(Polygon([(-20, -40), (0, -40), (0, 130), (-20, 130)], closed=True, facecolor="#f07840", edgecolor="#7a2606", alpha=0.65))
+    ax2.add_patch(Polygon([(209, -40), (229, -40), (229, 130), (209, 130)], closed=True, facecolor="#f07840", edgecolor="#7a2606", alpha=0.65))
 
-    # Lower Back Mounting Apron behind Gussets (X = 0..209, Z = -45..0)
-    ax2.add_patch(Polygon([(0, -45), (209, -45), (209, 0), (0, 0)], closed=True, facecolor="#fed7aa", edgecolor="#9a3412", alpha=0.55))
+    # Only 2x 8.0 mm Left & Right End Under-Box Gussets (X = 0..8 and X = 201..209, Z = -40..0)
+    for gx in (0.0, 201.0):
+        ax2.add_patch(Polygon([(gx, -40), (gx + 8, -40), (gx + 8, 0), (gx, 0)], closed=True, facecolor="#c2410c", edgecolor="#7a2606", lw=1.3))
 
-    # 5x 6.0 mm Under-Battery Gussets (Z = -45..0) + 45° Corbel Arches
-    gusset_xs = (0.0, 51.0, 103.0, 156.0, 203.0)
-    for gx in gusset_xs:
-        ax2.add_patch(Polygon([(gx, -45), (gx + 6, -45), (gx + 6, 0), (gx, 0)], closed=True, facecolor="#c2410c", edgecolor="#7a2606", lw=1.2))
-    for i in range(4):
-        x_l = gusset_xs[i] + 6.0
-        x_r = gusset_xs[i + 1]
-        xm = 0.5 * (x_l + x_r)
-        hw = 0.5 * (x_r - x_l)
-        ax2.add_patch(Polygon([(x_l, -hw), (xm, 0), (x_r, -hw), (x_r, 0), (x_l, 0)], closed=True, facecolor="#ea580c", edgecolor="#7a2606", lw=1.0))
-
-    # Main Box XZ Section + 40 mm Cradle Divider at X = 158..162 (No external gland boss/roof!)
+    # Main Box XZ Section + 40 mm Cradle Divider at X = 158..162
     box_xz = [
         (0, 0), (209, 0), (209, 152), (206.8, 152), (206.8, 160), (204, 160), (204, 5),
         (162, 5), (162, 45), (158, 45), (158, 5), (5, 5), (5, 160), (2.2, 160), (2.2, 152), (0, 152),
     ]
     ax2.add_patch(Polygon(box_xz, closed=True, facecolor="#d9541f", edgecolor="#7a2606", lw=1.4))
 
-    # Direct 10 AWG Wire Holes in Right Wall (X = 204..209, Z = 23.1..28.9)
-    ax2.add_patch(Polygon([(204, 23.1), (209, 23.1), (209, 28.9), (204, 28.9)], closed=True, facecolor="white", edgecolor="#333", lw=1.0))
+    # 2x Large Ø12.5 mm Wire Gland Holes in Right Wall (X = 204..209, Z = 21.75..34.25)
+    ax2.add_patch(Polygon([(204, 21.75), (209, 21.75), (209, 34.25), (204, 34.25)], closed=True, facecolor="white", edgecolor="#333", lw=1.1))
 
     # 3x Floor Ribs (Z = 5..8)
     for rx in (24.0, 81.5, 139.0):
@@ -220,9 +210,9 @@ def render_cross_section(path: str) -> None:
     ax2.add_patch(Polygon([(162, 5), (204, 5), (204, 160), (162, 160)], closed=True, facecolor="#fef08a", edgecolor="none", alpha=0.35))
     ax2.text(183, 82, "Excess Wire\n& Fuse Bay\n(42 × 67 × 155 mm)\n+ Zip-Tie Anchors", ha="center", va="center", fontsize=8.5, fontweight="bold", color="#713f12")
 
-    # 2x 10 AWG Wires routing from terminal directly through right-wall holes (Z = 26)
-    ax2.plot([143, 185, 185, 224], [126, 126, 26, 26], color="#dc2626", lw=3.2, label="10 AWG +12V")
-    ax2.plot([143, 174, 174, 224], [123, 123, 28, 28], color="#1f2937", lw=3.2, label="10 AWG GND")
+    # 2x 10 AWG Wires routing from terminal together through Primary Ø12.5 mm hole (Z = 28)
+    ax2.plot([143, 185, 185, 224], [126, 126, 26.5, 26.5], color="#dc2626", lw=3.2, label="10 AWG +12V")
+    ax2.plot([143, 174, 174, 224], [123, 123, 29.5, 29.5], color="#1f2937", lw=3.2, label="10 AWG GND")
 
     # Overhang Lid XZ Section (X = -12..221, Z = 138..174)
     lid_xz = [
@@ -233,18 +223,15 @@ def render_cross_section(path: str) -> None:
     ]
     ax2.add_patch(Polygon(lid_xz, closed=True, facecolor="#38424d", edgecolor="#181d24", lw=1.4, alpha=0.9))
 
-    # Mounting Screw Holes on Flanges & Under-Battery Apron (Z = -26 mm, 35 mm, 96/105 mm keyhole)
+    # Mounting Screw Holes on Left & Right Flanges (Z = -24 mm lower, Z = 96/105 mm upper keyhole)
     for sx in (-10.0, 219.0):
-        ax2.add_patch(Circle((sx, -26.0), 2.6, facecolor="white", edgecolor="#333", lw=1.2))
-        ax2.add_patch(Circle((sx, 35.0), 2.6, facecolor="white", edgecolor="#333", lw=1.2))
+        ax2.add_patch(Circle((sx, -24.0), 2.6, facecolor="white", edgecolor="#333", lw=1.2))
         ax2.add_patch(Circle((sx, 105.0), 2.6, facecolor="white", edgecolor="#333", lw=1.2))
         ax2.add_patch(Circle((sx, 96.0), 5.2, facecolor="white", edgecolor="#333", lw=1.2))
-    for cx_low in (80.0, 132.5):
-        ax2.add_patch(Circle((cx_low, -26.0), 2.6, facecolor="white", edgecolor="#333", lw=1.2))
 
-    ax2.annotate("2× Ø5.8 mm Direct\n10 AWG Wire Holes", xy=(209, 26), xytext=(168, -54),
+    ax2.annotate("2× Ø12.5 mm Holes (Primary + Spare)\nEach Sized for 2× 10 AWG Wire", xy=(209, 28), xytext=(125, -48),
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#1d4ed8"), fontsize=8.5, fontweight="bold", color="#1d4ed8")
-    ax2.annotate("5× 6 mm Gussets + 4× Lower\n#10 Screws at Z = -26 mm", xy=(80, -26), xytext=(22, -55),
+    ax2.annotate("2× Left/Right End Gussets (8 mm)\n+ Lower #10 Screws at Z = -24 mm", xy=(4, -24), xytext=(18, -48),
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#7a2606"), fontsize=8.5, fontweight="bold", color="#7a2606")
     ax2.annotate("+12 mm Side Overhang\n+ M4 Locking Screw", xy=(-12, 145), xytext=(-28, 188),
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#1d4ed8"), fontsize=8.5, fontweight="bold", color="#1d4ed8")
@@ -316,10 +303,10 @@ def render_h2d_plate(path: str) -> None:
     for gy in range(50, 320, 50):
         ax2.plot([0, 350], [gy, gy], color="#334155", lw=0.7, ls="--")
 
-    # Part 1: Battery Box (249 x 80 x 205 mm)
+    # Part 1: Battery Box (249 x 80 x 200 mm)
     bx0, by0 = off_x, off_y
     ax2.add_patch(Polygon([(bx0, by0), (bx0 + 249, by0), (bx0 + 249, by0 + 80), (bx0, by0 + 80)], closed=True, facecolor="#ea580c", edgecolor="#fdba74", lw=1.6, alpha=0.9))
-    ax2.text(bx0 + 124.5, by0 + 40, "1. print_battery_box.stl\n249.0 × 80.0 × 205.0 mm\n(Gusset feet & lower apron on z=0 · 45° corbels · 0 supports)", ha="center", va="center", color="white", fontsize=8.5, fontweight="bold")
+    ax2.text(bx0 + 124.5, by0 + 40, "1. print_battery_box.stl\n249.0 × 80.0 × 200.0 mm\n(2× Left/Right end gussets · 2× Ø12.5 mm wire holes)", ha="center", va="center", color="white", fontsize=8.5, fontweight="bold")
 
     # Part 2: Overhang Lid (233 x 98.9 x 41.6 mm)
     lx0, ly0 = off_x + 8.0, off_y + 96.0
@@ -348,7 +335,7 @@ if __name__ == "__main__":
         os.path.join(box.RENDERS_DIR, "iso-assembled.png"),
         elev=24,
         azim=52,
-        title="Aggie Cold Box 12V 10Ah Battery Enclosure: Overhang Drip Lid, 5× Under-Battery Gussets & Direct 10AWG Wire Holes",
+        title="Aggie Cold Box 12V 10Ah Battery Enclosure: 2× Left/Right End Gussets & Dual Ø12.5 mm (2×10AWG) Wire Holes",
     )
     render_3d(
         asm,
@@ -356,7 +343,7 @@ if __name__ == "__main__":
         elev=46,
         azim=52,
         hide=("print_overhang_lid",),
-        title="Lid Off: Mighty Max 12V 10Ah in Left Cradle Bay, 42 mm Wire-Stuffing Bay on Right, Under-Battery Gussets & Direct Wire Holes",
+        title="Lid Off: Mighty Max 12V 10Ah in Left Cradle Bay, 42 mm Wire Bay, 2× End Gussets & Primary + Spare Ø12.5 mm Holes",
     )
     render_3d(
         asm,
@@ -373,7 +360,7 @@ if __name__ == "__main__":
         azim=-60,
         hide=("planter_cedar_wall",),
         opaque=("print_overhang_lid",),
-        title="Rear Mounting View: 5× Under-Battery Gussets, Extended Lower #10 Screw Holes (Z = -26 mm) & Upper Drop-On Keyholes",
+        title="Rear Mounting View: 2× Left/Right End Gussets, Extended Lower #10 Screw Holes (Z = -24 mm) & Upper Keyholes",
     )
     render_cross_section(os.path.join(box.RENDERS_DIR, "cross-section-drip.png"))
     render_h2d_plate(os.path.join(box.RENDERS_DIR, "h2d-print-plate.png"))

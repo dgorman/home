@@ -21,12 +21,12 @@
     "a": [
       -20.0,
       0.0,
-      -45.0
+      -40.0
     ],
     "b": [
       229.0,
       0.0,
-      -45.0
+      -40.0
     ],
     "label": "Flange Span 249 mm (9.80 in)",
     "off": [
@@ -75,14 +75,14 @@
     "a": [
       0.0,
       77.0,
-      -45.0
+      -40.0
     ],
     "b": [
       0.0,
       77.0,
       160.0
     ],
-    "label": "Total Height 205 mm (incl. 45 mm under-battery gussets)",
+    "label": "Total Height 200 mm (incl. 40 mm left/right gussets)",
     "off": [
       -32.0,
       15.0,
