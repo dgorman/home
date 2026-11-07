@@ -18,53 +18,45 @@ BATT_CASE_H_Z: float = 111.0        # Flat case top height along Z (mm)
 BATT_TOTAL_H_Z: float = 119.0       # Total height over F2 spade terminals (mm)
 BATT_CLEAR_XY: float = 1.0          # 1.0 mm per-side pocket clearance
 
-# Main Enclosure Structural Envelope
+# Main Enclosure Structural Envelope (Flat Z = 0 Build-Plate Bottom + Heavy 10 mm Thick Floor)
 WALL_T: float = 5.0                 # 5.0 mm heavy-duty outdoor wall thickness
-FLOOR_T: float = 5.0                # 5.0 mm structural floor thickness (Z = 0.0 .. 5.0)
+FLOOR_T: float = 10.0               # 10.0 mm extra-thick structural floor slab (Z = 0.0 .. 10.0, prints flat on bed!)
 FLOOR_RIB_H: float = 3.0            # 3.0 mm raised floor support/drainage ribs under battery
-BATT_Z0: float = FLOOR_T + FLOOR_RIB_H  # 8.0 mm battery resting elevation
+BATT_Z0: float = FLOOR_T + FLOOR_RIB_H  # 13.0 mm battery resting elevation
 
 BATT_BAY_W_X: float = BATT_LEN_X + 2.0 * BATT_CLEAR_XY  # 153.0 mm (X = 5.0 .. 158.0)
 DIVIDER_T_X: float = 4.0            # 4.0 mm battery cradle divider rib (X = 158.0 .. 162.0)
-DIVIDER_H_Z: float = 40.0           # 40.0 mm tall above floor (Z = 5.0 .. 45.0)
+DIVIDER_H_Z: float = 40.0           # 40.0 mm tall above floor (Z = 10.0 .. 50.0)
 WIRE_BAY_W_X: float = 42.0          # 42.0 mm dedicated excess wire & fuse bay (X = 162.0 .. 204.0)
 INNER_DEPTH_Y: float = BATT_WID_Y + 2.0 * BATT_CLEAR_XY  # 67.0 mm (Y = 5.0 .. 72.0)
-OVERHEAD_WIRE_H_Z: float = 33.0     # 33.0 mm clear headroom above F2 terminals (Z = 127.0 .. 160.0)
+OVERHEAD_WIRE_H_Z: float = 33.0     # 33.0 mm clear headroom above F2 terminals (Z = 132.0 .. 165.0)
 
 BOX_WIDTH_X: float = WALL_T + BATT_BAY_W_X + DIVIDER_T_X + WIRE_BAY_W_X + WALL_T  # 209.0 mm
 BOX_DEPTH_Y: float = WALL_T + INNER_DEPTH_Y + WALL_T                              # 77.0 mm
-BOX_SHOULDER_Z: float = 152.0       # Outer wall shoulder height where lid collar seats
+BOX_SHOULDER_Z: float = 157.0       # Outer wall shoulder height where lid collar seats
 SPLASH_LIP_H_Z: float = 8.0         # 8.0 mm tall raised inner labyrinth splash lip
 SPLASH_LIP_STEP: float = 2.2        # 2.2 mm outer step-in (lip thickness = 2.8 mm)
-BOX_TOTAL_H_Z: float = BOX_SHOULDER_Z + SPLASH_LIP_H_Z                            # 160.0 mm
+BOX_TOTAL_H_Z: float = BOX_SHOULDER_Z + SPLASH_LIP_H_Z                            # 165.0 mm
 
-# Under-Box Left & Right Support Gussets & Extended Lower Mounting Flanges (Z = -40.0 .. 0.0 mm)
-UNDER_GUSSET_H_Z: float = 40.0      # Extends 40.0 mm below the Z = 0.0 floor (down to Z = -40.0 mm)
-UNDER_GUSSET_T_X: float = 8.0       # 8.0 mm thick Left & Right end gussets (X = 0..8 and X = 201..209)
-GUSSET_X_POSITIONS: tuple[float, ...] = (
-    0.0,                            # Left end under-box gusset (X = 0..8 mm)
-    BOX_WIDTH_X - UNDER_GUSSET_T_X, # Right end under-box gusset (X = 201..209 mm)
-)
-
-# Rear Planter-Wall Drainage Standoffs & Extended Side/Lower Mounting Flanges
+# Rear Planter-Wall Drainage Standoffs & Side Mounting Flanges (All flat on Z = 0.0 mm build plate!)
 STANDOFF_DEPTH_Y: float = 3.0       # 3.0 mm drainage/airflow gap behind box (Y = -3.0 .. 0.0)
 STANDOFF_W_X: float = 10.0          # 10.0 mm wide vertical standoff ribs
-STANDOFF_TOP_Z: float = 136.0       # Ends 2.0 mm below lid skirt (Z = 138.0)
+STANDOFF_TOP_Z: float = 141.0       # Ends 2.0 mm below lid skirt (Z = 143.0)
 
 FLANGE_W_X: float = 20.0            # 20.0 mm wide left/right mounting ears (X = -20..0, 209..229)
 FLANGE_T_Y: float = STANDOFF_DEPTH_Y + WALL_T  # 8.0 mm thick solid flange (Y = -3.0 .. 5.0)
-FLANGE_Z0: float = -UNDER_GUSSET_H_Z           # -40.0 mm (extends 40 mm below box floor alongside the 2 gussets!)
-FLANGE_TOP_Z: float = 130.0         # Z = -40.0 .. +130.0 mm (170.0 mm total vertical span)
+FLANGE_Z0: float = 0.0              # Flush with the Z = 0.0 mm floor for 100% flat build-plate printing!
+FLANGE_TOP_Z: float = 135.0         # Z = 0.0 .. +135.0 mm
 SCREW_CLEAR_DIA: float = 5.2        # #10 stainless wood screw clearance (mm)
 SCREW_CBORE_DIA: float = 10.5       # Washer/pan-head counterbore & keyhole entry diameter
-SCREW_LOWER_Z: float = -24.0        # Extended down below the battery floor (Z = -24.0 mm) next to the 2 gussets
-SCREW_UPPER_Z: float = 105.0        # Upper keyhole screw elevation
+SCREW_LOWER_Z: float = 20.0         # Lower #10 mounting screw elevation (anchored next to the 10 mm thick floor)
+SCREW_UPPER_Z: float = 110.0        # Upper keyhole screw elevation
 
 # Fastener & Heat-Set Insert Specifications
 M4_CLEAR_DIA: float = 4.5           # M4 clearance hole (mm)
 M4_CBORE_DIA: float = 8.6           # M4 button-head counterbore diameter (mm)
 M4_INSERT_BORE_DIA: float = 5.6     # McMaster 94180A353 M4 tapered heat-set insert bore
-LID_M4_Z: float = 145.0             # Side M4 lid locking screw elevation
+LID_M4_Z: float = 150.0             # Side M4 lid locking screw elevation
 LID_M4_Y: float = 38.5              # Centered on box depth (77.0 / 2)
 
 # Dual Large 2x 10 AWG Wire Holes through Right Wall (Primary Hole + Spare Hole of Same Size)
@@ -72,7 +64,7 @@ WIRE_10AWG_OD: float = 4.8          # Insulated 10 AWG wire jacket OD (~4.8 mm)
 WIRE_GLAND_HOLE_DIA: float = 12.5   # Large 12.5 mm (~1/2") hole sized to take 2x 10 AWG wires together
 WIRE_HOLE_PRIMARY_Y: float = 27.0   # Primary 2x 10 AWG hole Y center (mm)
 WIRE_HOLE_SPARE_Y: float = 51.0     # Spare 2x 10 AWG hole Y center right next to it (24.0 mm spacing)
-WIRE_EXIT_CENTER_Z: float = 28.0    # Low on right wall of wiring bay (Z = 28.0 mm)
+WIRE_EXIT_CENTER_Z: float = 33.0    # Low on right wall of wiring bay (Z = 33.0 mm)
 
 # Weatherproof Overhang Lid (Sloped Shed Roof + Eaves + Undercut Drip Groove)
 LID_OVERHANG_SIDE_X: float = 12.0   # 12.0 mm overhang left (X = -12.0) and right (X = 221.0)
@@ -84,9 +76,9 @@ LID_RIGHT_X1: float = BOX_WIDTH_X + LID_OVERHANG_SIDE_X   # 221.0 mm
 LID_WIDTH_X: float = LID_RIGHT_X1 - LID_LEFT_X0           # 233.0 mm
 LID_DEPTH_Y: float = LID_FRONT_Y1 - LID_BACK_Y0           # 94.0 mm
 
-LID_SKIRT_Z0: float = 138.0         # Bottom of outer drip skirt (22 mm below Z = 160 rim)
-LID_ROOF_FRONT_Z: float = 167.0     # Top of roof at front eave (Y = 91.0 mm)
-LID_ROOF_BACK_Z: float = 180.0      # Top of roof at back wall (Y = -3.0 mm -> 8-deg shed slope!)
+LID_SKIRT_Z0: float = 143.0         # Bottom of outer drip skirt (22 mm below Z = 165 rim)
+LID_ROOF_FRONT_Z: float = 172.0     # Top of roof at front eave (Y = 91.0 mm)
+LID_ROOF_BACK_Z: float = 185.0      # Top of roof at back wall (Y = -3.0 mm -> 8-deg shed slope!)
 LID_COLLAR_CLEAR: float = 0.6       # 0.6 mm per-side slip fit around box walls
 DRIP_LIP_W: float = 3.5             # Outer drip bead width
 DRIP_GROOVE_W: float = 3.2          # Undercut drip channel width
@@ -129,8 +121,7 @@ def register_user_parameters(design: adsk.fusion.Design) -> None:
         ("BATT_TOTAL_H_Z", BATT_TOTAL_H_Z, "mm", "Mighty Max 12V 10Ah height over F2 terminals"),
         ("WIRE_BAY_W_X", WIRE_BAY_W_X, "mm", "Side wire & fuse stuffing compartment width"),
         ("OVERHEAD_WIRE_H_Z", OVERHEAD_WIRE_H_Z, "mm", "Overhead wire clearance above F2 terminals"),
-        ("UNDER_GUSSET_H_Z", UNDER_GUSSET_H_Z, "mm", "Under-battery support gusset & lower flange depth"),
-        ("SCREW_LOWER_Z", abs(SCREW_LOWER_Z), "mm", "Lower mounting screw distance below floor"),
+        ("FLOOR_T", FLOOR_T, "mm", "Heavy 10.0 mm thick structural floor slab (prints flat on bed)"),
         ("BOX_WIDTH_X", BOX_WIDTH_X, "mm", "Main enclosure outer width (excluding mounting flanges)"),
         ("BOX_DEPTH_Y", BOX_DEPTH_Y, "mm", "Main enclosure outer depth (excluding rear standoffs)"),
         ("LID_OVERHANG_SIDE_X", LID_OVERHANG_SIDE_X, "mm", "Lid snow/water overhang per side"),
@@ -419,7 +410,7 @@ def build_planter_wall_component(
     plank_w_x = 300.0
     x0 = BOX_WIDTH_X / 2.0 - plank_w_x / 2.0
     y0 = -STANDOFF_DEPTH_Y - plank_thick
-    for idx, (z0, h) in enumerate(((-60.0, 72.0), (13.5, 72.0), (87.0, 72.0), (160.5, 35.0))):
+    for idx, (z0, h) in enumerate(((-15.0, 72.0), (58.5, 72.0), (132.0, 68.0))):
         board = add_box_feature(
             comp, x0, y0, z0, plank_w_x, plank_thick, h,
             body_name=f"aggie_cedar_plank_{idx}",
@@ -480,8 +471,8 @@ def build_battery_box_component(
             adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
         )
 
-    # 6. 2x Internal 45-deg Support-Free Zip-Tie Anchor Bridges on Back Wall of Wiring Bay (X: 176..190, Z: 65 & 110)
-    for tz in (65.0, 110.0):
+    # 6. 2x Internal 45-deg Support-Free Zip-Tie Anchor Bridges on Back Wall of Wiring Bay (X: 176..190, Z: 70 & 115)
+    for tz in (70.0, 115.0):
         b_pts = [
             (176.0, WALL_T, tz - 12.0),
             (176.0, WALL_T + 6.0, tz - 6.0),
@@ -497,27 +488,14 @@ def build_battery_box_component(
             adsk.fusion.FeatureOperations.CutFeatureOperation, box,
         )
 
-    # 7. Two Under-Box Support Gussets (Left at X = 0..8 mm, Right at X = 201..209 mm, Z = -40.0 .. 0.0 mm)
-    for gx0 in GUSSET_X_POSITIONS:
-        gusset_pts = [
-            (gx0, -STANDOFF_DEPTH_Y, -UNDER_GUSSET_H_Z),
-            (gx0, WALL_T, -UNDER_GUSSET_H_Z),
-            (gx0, BOX_DEPTH_Y, 0.0),
-            (gx0, -STANDOFF_DEPTH_Y, 0.0),
-        ]
-        add_polygon_extrusion(
-            comp, "x", gx0, UNDER_GUSSET_T_X, gusset_pts,
-            adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
-        )
-
-    # 8. 4x Rear Planter-Wall Drainage Standoff Ribs on upper box (Y: -3..0, Z: 0..136, width 10 mm)
+    # 7. 4x Rear Planter-Wall Drainage Standoff Ribs on box back (Y: -3..0, Z: 0..141, width 10 mm, flat on Z = 0 bed!)
     for sx in (10.0, 75.0, 134.0, 199.0):
         add_box_feature(
             comp, sx - STANDOFF_W_X / 2.0, -STANDOFF_DEPTH_Y, 0.0, STANDOFF_W_X, STANDOFF_DEPTH_Y, STANDOFF_TOP_Z,
             adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
         )
 
-    # 9. Left & Right Extended Planter Mounting Flanges (X: -20..0 and 209..229, Y: -3..5, Z: -40..130)
+    # 8. Left & Right Planter Mounting Flanges (X: -20..0 and 209..229, Y: -3..5, Z: 0..135, flat on Z = 0 bed!)
     for fx0, fx_center in (
         (-FLANGE_W_X, -FLANGE_W_X / 2.0),
         (BOX_WIDTH_X, BOX_WIDTH_X + FLANGE_W_X / 2.0),
@@ -527,7 +505,7 @@ def build_battery_box_component(
             adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
         )
 
-        # Lower #10 wood-screw hole extended DOWN below the battery floor (Z = -24.0 mm) + Upper Keyhole (Z = 105.0)
+        # Lower #10 wood-screw hole (Z = 20.0 mm) + Upper Keyhole (Z = 110.0 mm)
         cut_cylinders_on_plane(
             comp, box, "y", -STANDOFF_DEPTH_Y - 1.0, FLANGE_T_Y + 3.0,
             [
@@ -554,7 +532,7 @@ def build_battery_box_component(
             adsk.fusion.FeatureOperations.CutFeatureOperation, box,
         )
 
-    # 10. Cut 2x Large Ø12.5 mm (2x 10 AWG) Wire Gland Holes through the right side wall (Primary + Spare)
+    # 9. Cut 2x Large Ø12.5 mm (2x 10 AWG) Wire Gland Holes through the right side wall (Primary + Spare)
     cut_cylinders_on_plane(
         comp, box, "x", BOX_WIDTH_X - WALL_T - 1.0, WALL_T + 2.0,
         [
@@ -724,7 +702,7 @@ def build_battery_and_wiring_component(
         adsk.fusion.FeatureOperations.JoinFeatureOperation, w_pos,
     )
     add_cylinder_feature(
-        comp, "x", 143.0, 42.0, 143.0, wy_pos, 126.0, r_wire,
+        comp, "x", 143.0, 42.0, 143.0, wy_pos, 131.0, r_wire,
         adsk.fusion.FeatureOperations.JoinFeatureOperation, w_pos,
     )
     apply_color(app, design, w_pos, *COL_TERM_RED)
@@ -738,7 +716,7 @@ def build_battery_and_wiring_component(
         adsk.fusion.FeatureOperations.JoinFeatureOperation, w_neg,
     )
     add_cylinder_feature(
-        comp, "x", 143.0, 31.0, 143.0, wy_neg, 132.0, r_wire,
+        comp, "x", 143.0, 31.0, 143.0, wy_neg, 137.0, r_wire,
         adsk.fusion.FeatureOperations.JoinFeatureOperation, w_neg,
     )
     apply_color(app, design, w_neg, *COL_TERM_BLACK)
@@ -784,8 +762,7 @@ def run(context: dict) -> None:
         ui.messageBox(
             "Aggie Cold Box 12V 10Ah Battery Enclosure generated successfully!\n\n"
             f"• Battery Bay: {BATT_BAY_W_X:.0f} × {INNER_DEPTH_Y:.0f} mm (Mighty Max ML10-12: 151 × 65 × 119 mm)\n"
-            f"• Under-Box Support: 2× {UNDER_GUSSET_T_X:.0f} mm thick Left & Right gussets extending {UNDER_GUSSET_H_Z:.0f} mm below floor\n"
-            f"• Lower Mounting Holes: Extended down to Z = {SCREW_LOWER_Z:.0f} mm on Left & Right flanges (2× lower + 2× upper keyholes)\n"
+            f"• Structural Floor: {FLOOR_T:.0f}.0 mm thick solid base slab + {FLOOR_RIB_H:.0f}.0 mm ribs (prints 100% flat on build plate!)\n"
             f"• Wire-Stuffing Bay: {WIRE_BAY_W_X:.0f} × {INNER_DEPTH_Y:.0f} × 155 mm side bay + {OVERHEAD_WIRE_H_Z:.0f} mm overhead clearance\n"
             f"• Wire Gland Holes: 2× Ø{WIRE_GLAND_HOLE_DIA:.1f} mm holes (1 primary for 2× 10AWG + 1 spare for 2× 10AWG)",
             "Aggie Cold Box Battery Enclosure Complete",
