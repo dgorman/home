@@ -50,11 +50,11 @@
 <div id="hud">
   <div class="panel" id="controls">
     <h1>Aggie Cold Box · 12V 10Ah Battery Box</h1>
-    <div class="muted">Weatherproof 3D-printed enclosure for Mighty Max ML10-12 (12V 10Ah) with 8° snow-shed overhang lid, undercut drip groove, 42 mm wire-stuffing bay &amp; 2× 10AWG actuator wire gland.</div>
+    <div class="muted">Weatherproof 3D-printed enclosure for Mighty Max ML10-12 (12V 10Ah) with 8° snow-shed overhang lid, 5× under-battery gussets, extended lower mounts, 42 mm wire-stuffing bay &amp; 2× 10AWG wire holes.</div>
     <div class="row">
       <button data-view="iso">Iso</button>
       <button data-view="front">Front</button>
-      <button data-view="gland">Gland side</button>
+      <button data-view="gland">Wire side</button>
       <button data-view="top">Top</button>
       <button data-view="back">Planter back</button>
       <button id="lift-lid" class="primary">Lift lid</button>
@@ -69,12 +69,13 @@
     <div class="eyebrow">Key Specifications</div>
     <dl>
       <dt>Battery</dt><dd>Mighty Max ML10-12 (151 × 65 × 119 mm)</dd>
-      <dt>Main Box</dt><dd>209 × 77 × 162 mm (249 mm w/ flanges)</dd>
+      <dt>Main Box</dt><dd>249 × 80 × 205 mm (incl. 45 mm gussets)</dd>
       <dt>Overhang Lid</dt><dd>233 × 94 × 42 mm (8° slope, +12/14 mm eaves)</dd>
-      <dt>Wire Bay</dt><dd>42 × 67 × 157 mm side + 35 mm overhead</dd>
-      <dt>Wire Gland</dt><dd>2 × 10 AWG (Ø5.2 mm) + 45° rain hood</dd>
-      <dt>Planter Mount</dt><dd>4 × #10 screws (keyholes) + 3 mm standoffs</dd>
-      <dt>Print Bed</dt><dd>Fits Bambu P1P (256²) &amp; H2D (350×320)</dd>
+      <dt>Under Gussets</dt><dd>5 × 6 mm gussets (45 mm deep, 45° corbels)</dd>
+      <dt>Wire Bay</dt><dd>42 × 67 × 155 mm side + 33 mm overhead</dd>
+      <dt>Wire Exit</dt><dd>2 × Ø5.8 mm direct 10 AWG holes in right wall</dd>
+      <dt>Planter Mount</dt><dd>8 × #10 screws (Z = -26, 35, 105 mm)</dd>
+      <dt>Print Bed</dt><dd>2-part print on Bambu Lab H2D (350×320)</dd>
     </dl>
   </div>
 </div>
@@ -107,7 +108,6 @@ const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(-500, 
 const GROUPS = {
   print_battery_box:        ['Battery Box Enclosure (printed)', 0xd9541f, 1.0],
   print_overhang_lid:       ['Overhang Drip Lid (printed)',     0x38424d, 0.72],
-  print_wire_gland_cap:     ['2× 10AWG Gland Cap (printed)',    0xf27441, 1.0],
   battery_mightymax_12v10ah:['Mighty Max 12V 10Ah (ML10-12)',   0x26292e, 1.0],
   terminal_pos_f2:          ['F2 Spade Terminals (+ / -)',      0xdc2626, 1.0],
   wire_10awg:               ['2× 10 AWG Actuator Leads',        0xdc2626, 1.0],

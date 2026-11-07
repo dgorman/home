@@ -1,11 +1,9 @@
 """Bambu Lab H2D (350 x 320 x 325 mm) print orientation verification and plate builder.
 
-Verifies that every exported `print_*.stl` lies flat on z = 0 with maximum bed adhesion
-and zero supports, then packs the parts onto H2D build plates with 1 mm 2D raster
-overlap checks:
-  - `plate_h2d_all_in_one.stl`    : Box + Overhang Lid + 10AWG Gland Cap on 1 H2D bed (271 x 193 x 160 mm)
-  - `plate_h2d_01_box_and_gland.stl`: Box + 10AWG Gland Cap (same color, 283 x 80 x 160 mm)
-  - `plate_h2d_02_overhang_lid.stl` : Overhang Lid alone (contrasting roof color, 233 x 99 x 42 mm)
+Verifies that both exported `print_*.stl` files (`print_battery_box.stl` and
+`print_overhang_lid.stl`) lie flat on z = 0 with maximum bed adhesion and zero
+supports, then packs them onto `plate_h2d_all_in_one.stl` with 1 mm 2D raster
+overlap checks.
 """
 from __future__ import annotations
 
@@ -23,7 +21,6 @@ RENDERS_DIR = os.path.join(ROOT, "renders")
 BED_H2D_X: float = 350.0
 BED_H2D_Y: float = 320.0
 BED_H2D_Z: float = 325.0
-GAP: float = 14.0
 
 Triangle = list[tuple[float, float, float]]
 
@@ -99,33 +96,18 @@ def raster_footprint(tris: list[Triangle]) -> set[tuple[int, int]]:
 
 
 H2D_PLATES: dict[str, list[tuple[str, tuple[float, float]]]] = {
-    # 1. Single-plate H2D build: Box at front (y=0), Overhang Lid behind it (y=94), Gland Cap beside Lid (x=247, y=120)
+    # Single-plate H2D build: Battery Box (with under-floor gussets) at front (y=0), Overhang Lid behind it (y=96)
     "plate_h2d_all_in_one": [
         ("print_battery_box.stl", (0.0, 0.0)),
-        ("print_overhang_lid.stl", (8.0, 94.0)),
-        ("print_wire_gland_cap.stl", (249.0, 123.0)),
-    ],
-    # 2. Two-color split option — Plate 1: Main Box + Wire Gland Cap (e.g. Orange PETG/ASA)
-    "plate_h2d_01_box_and_gland": [
-        ("print_battery_box.stl", (0.0, 0.0)),
-        ("print_wire_gland_cap.stl", (261.0, 20.0)),
-    ],
-    # 3. Two-color split option — Plate 2: Sloped Overhang Drip Lid (e.g. Dark Slate ASA)
-    "plate_h2d_02_overhang_lid": [
-        ("print_overhang_lid.stl", (0.0, 0.0)),
+        ("print_overhang_lid.stl", (8.0, 96.0)),
     ],
 }
 
 
 def build_h2d_plates(stl_dir: str = STL_DIR) -> None:
-    """Verify individual parts and pack H2D multi-part plates with 2D raster overlap checks."""
-    # Remove any legacy plate_01_all_parts.stl
-    legacy = os.path.join(stl_dir, "plate_01_all_parts.stl")
-    if os.path.exists(legacy):
-        os.remove(legacy)
-
+    """Verify individual parts and pack the H2D multi-part plate with 2D raster overlap checks."""
     print("== Verifying Bed Contact Area (z = 0) for Individual Parts ==")
-    for fn in ("print_battery_box.stl", "print_overhang_lid.stl", "print_wire_gland_cap.stl"):
+    for fn in ("print_battery_box.stl", "print_overhang_lid.stl"):
         p = os.path.join(stl_dir, fn)
         tris = normalise(read_stl(p))
         write_stl(p, tris)
@@ -133,7 +115,7 @@ def build_h2d_plates(stl_dir: str = STL_DIR) -> None:
         area = bed_contact_area_mm2(tris)
         print(f"  {fn:28s}: {hi[0]:5.1f} x {hi[1]:5.1f} x {hi[2]:5.1f} mm | bed contact = {area:7.1f} mm^2")
 
-    print(f"== Packing & Checking Bambu Lab H2D Plates ({BED_H2D_X:.0f} x {BED_H2D_Y:.0f} x {BED_H2D_Z:.0f} mm) ==")
+    print(f"== Packing & Checking Bambu Lab H2D Plate ({BED_H2D_X:.0f} x {BED_H2D_Y:.0f} x {BED_H2D_Z:.0f} mm) ==")
     for plate_name, items in H2D_PLATES.items():
         combined: list[Triangle] = []
         footprints: list[tuple[str, set[tuple[int, int]]]] = []
@@ -143,7 +125,6 @@ def build_h2d_plates(stl_dir: str = STL_DIR) -> None:
             combined.extend(placed)
             footprints.append((fn, raster_footprint(placed)))
 
-        # Center the packed plate on the origin (0..W, 0..D)
         combined = normalise(combined)
         _, hi = bounds(combined)
         assert hi[0] <= BED_H2D_X and hi[1] <= BED_H2D_Y and hi[2] <= BED_H2D_Z, (

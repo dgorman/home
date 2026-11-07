@@ -15,7 +15,6 @@ COLORS: dict[str, tuple[float, float, float, float]] = {
     "planter_cedar_wall": (0.68, 0.45, 0.26, 0.45),
     "print_battery_box": (0.85, 0.33, 0.12, 1.0),
     "print_overhang_lid": (0.22, 0.26, 0.31, 0.55),
-    "print_wire_gland_cap": (0.92, 0.42, 0.18, 1.0),
     "battery_mightymax_12v10ah": (0.16, 0.18, 0.21, 0.96),
     "terminal_pos_f2": (0.88, 0.16, 0.16, 1.0),
     "terminal_neg_f2": (0.10, 0.10, 0.12, 1.0),
@@ -115,24 +114,31 @@ def render_3d(
 
 
 def render_cross_section(path: str) -> None:
-    """Draw a 2-panel engineering cross-section: (Left) YZ Side Drip Profile, (Right) XZ Front Layout."""
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 7.5), dpi=130, gridspec_kw={"width_ratios": [1.0, 1.35]})
+    """Draw a 2-panel engineering cross-section: (Left) YZ Side Drip & Gusset Profile, (Right) XZ Front Layout."""
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 7.8), dpi=130, gridspec_kw={"width_ratios": [1.0, 1.35]})
     fig.patch.set_facecolor("white")
 
-    # --- Panel 1: YZ Side Cross-Section (Weatherproofing, Overhang Lid & Drip Lip) ---
-    ax1.set_title("A-A Side Cross-Section: Snow/Water Overhang & Labyrinth Seal", fontsize=11, fontweight="bold", pad=10)
+    # --- Panel 1: YZ Side Cross-Section (Weatherproofing, Overhang Lid, Under-Battery Gusset) ---
+    ax1.set_title("A-A Side Cross-Section: Overhang Lid, Labyrinth Seal & Under-Battery Gusset", fontsize=10.5, fontweight="bold", pad=10)
     # Cedar planter back wall (Y = -23 .. -3)
-    for z0 in (-15.0, 53.5, 127.0):
+    for z0 in (-55.0, 20.0, 95.0):
         ax1.add_patch(Polygon([(-23, z0), (-3, z0), (-3, z0 + 70), (-23, z0 + 70)], closed=True, facecolor="#b87a4b", edgecolor="#6e4423", alpha=0.65))
-    ax1.text(-13, 90, "Aggie Cold Box\nCedar Wall", ha="center", va="center", fontsize=8.5, color="#4a2c14", rotation=90, fontweight="bold")
+    ax1.text(-13, 60, "Aggie Cold Box\nCedar Wall", ha="center", va="center", fontsize=8.5, color="#4a2c14", rotation=90, fontweight="bold")
 
-    # 3 mm Rear Standoff Rib (Y = -3 .. 0, Z = 0 .. 136)
-    ax1.add_patch(Polygon([(-3, 0), (0, 0), (0, 136), (-3, 136)], closed=True, facecolor="#f07840", edgecolor="#9e3308", hatch="///", alpha=0.7))
+    # 3 mm Rear Standoff Rib (Y = -3 .. 0, Z = -45 .. 136)
+    ax1.add_patch(Polygon([(-3, -45), (0, -45), (0, 136), (-3, 136)], closed=True, facecolor="#f07840", edgecolor="#9e3308", hatch="///", alpha=0.7))
 
-    # Box Back Wall, Floor, and Front Wall (with Z = 152..162 stepped splash lip)
+    # Under-Battery Gusset (Y = -3..32..77, Z = -45..0)
+    ax1.add_patch(Polygon([(-3, -45), (32, -45), (77, 0), (-3, 0)], closed=True, facecolor="#ea580c", edgecolor="#7a2606", lw=1.3, alpha=0.85))
+    ax1.text(28, -22, "5× 6 mm Under-Battery\nGussets (45° Slope)", ha="center", va="center", color="white", fontsize=8.0, fontweight="bold")
+
+    # Lower #10 Screw into Cedar Wall at Z = -26 mm
+    ax1.plot([-20, 8], [-26, -26], color="#1e293b", lw=2.6, ls="--")
+
+    # Box Back Wall, Floor, and Front Wall (with Z = 152..160 stepped splash lip)
     box_yz = [
-        (0, 0), (77, 0), (77, 152), (74.8, 152), (74.8, 162), (72, 162),
-        (72, 5), (5, 5), (5, 162), (0, 162),
+        (0, 0), (77, 0), (77, 152), (74.8, 152), (74.8, 160), (72, 160),
+        (72, 5), (5, 5), (5, 160), (0, 160),
     ]
     ax1.add_patch(Polygon(box_yz, closed=True, facecolor="#d9541f", edgecolor="#7a2606", lw=1.4))
 
@@ -144,51 +150,62 @@ def render_cross_section(path: str) -> None:
     ax1.add_patch(Polygon([(52, 119), (62, 119), (62, 127), (52, 127)], closed=True, facecolor="#e02828", edgecolor="#700", lw=1.0))
     ax1.text(38.5, 62, "Mighty Max\n12V 10Ah\n(65 × 111 mm)", ha="center", va="center", color="white", fontsize=9, fontweight="bold")
 
-    # Sloped Overhang Lid in YZ Cross-Section (Y = -3..91, Z = 138..180, with undercut drip channel at Y = 84.3..87.5, Z = 138..141)
+    # Sloped Overhang Lid in YZ Cross-Section (Y = -3..91, Z = 138..179.6, with undercut drip channel at Y = 84.3..87.5, Z = 138..141)
     lid_yz = [
-        (-3.0, 180.0), (91.0, 167.0), (91.0, 138.0), (87.5, 138.0),
+        (-3.0, 179.6), (91.0, 166.4), (91.0, 138.0), (87.5, 138.0),
         (87.5, 141.0), (84.3, 141.0), (84.3, 138.0), (77.6, 138.0),
-        (77.6, 152.6), (75.4, 152.6), (75.4, 163.0), (-0.6, 163.0),
+        (77.6, 152.6), (75.4, 152.6), (75.4, 160.4), (-0.6, 171.0),
         (-0.6, 138.0), (-3.0, 138.0),
     ]
     ax1.add_patch(Polygon(lid_yz, closed=True, facecolor="#38424d", edgecolor="#181d24", lw=1.4, alpha=0.9))
 
     # Annotations on Panel 1
-    ax1.annotate("8° Sloped Roof\n(Snow & Rain Shed)", xy=(45, 173.5), xytext=(22, 193),
+    ax1.annotate("8° Sloped Roof\n(Snow & Rain Shed)", xy=(45, 173.0), xytext=(22, 192),
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#1d4ed8"), fontsize=8.5, fontweight="bold", color="#1d4ed8")
     ax1.annotate("+14 mm Front Eave\n+ Undercut Drip Lip", xy=(88.5, 138.0), xytext=(55, 116),
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#1d4ed8"), fontsize=8.5, fontweight="bold", color="#1d4ed8")
-    ax1.annotate("10 mm Inner\nLabyrinth Splash Lip", xy=(73.5, 158.0), xytext=(82, 178),
+    ax1.annotate("8 mm Inner\nLabyrinth Splash Lip", xy=(73.5, 157.0), xytext=(80, 178),
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#b91c1c"), fontsize=8.5, fontweight="bold", color="#b91c1c")
-    ax1.annotate("35 mm Overhead\nWire Clearance", xy=(35, 145), xytext=(10, 142),
-                 fontsize=8.5, fontweight="bold", color="#0f5132")
-    ax1.annotate("3 mm Drainage\nStandoff Gap", xy=(-1.5, 25), xytext=(-26, -24),
+    ax1.annotate("Lower #10 Screw\n(Z = -26 mm Support)", xy=(0, -26), xytext=(48, -42),
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#7a2606"), fontsize=8.5, fontweight="bold", color="#7a2606")
 
     ax1.set_xlim(-32, 112)
-    ax1.set_ylim(-30, 206)
+    ax1.set_ylim(-60, 206)
     ax1.set_aspect("equal")
     ax1.set_xlabel("Y Depth from Planter Wall (mm)")
     ax1.set_ylabel("Z Elevation (mm)")
     ax1.grid(True, linestyle=":", alpha=0.4)
 
-    # --- Panel 2: XZ Front Cross-Section (Battery Bay, Wire Stuffing Bay & 2x 10 AWG Gland) ---
-    ax2.set_title("B-B Front Cross-Section: Battery Cradle, Wire-Stuffing Bay & 2× 10AWG Gland", fontsize=11, fontweight="bold", pad=10)
+    # --- Panel 2: XZ Front Cross-Section (Battery Bay, Wire Stuffing Bay, Under-Battery Gussets & Direct Wire Holes) ---
+    ax2.set_title("B-B Front Cross-Section: Under-Battery Gussets, Extended Mounts & Direct Wire Holes", fontsize=10.5, fontweight="bold", pad=10)
 
-    # Left & Right Mounting Flanges (X = -20..0, 209..229, Z = 0..130)
-    ax2.add_patch(Polygon([(-20, 0), (0, 0), (0, 130), (-20, 130)], closed=True, facecolor="#f07840", edgecolor="#7a2606", alpha=0.65))
-    ax2.add_patch(Polygon([(209, 0), (229, 0), (229, 130), (209, 130)], closed=True, facecolor="#f07840", edgecolor="#7a2606", alpha=0.65))
+    # Left & Right Mounting Flanges (X = -20..0, 209..229, Z = -45..130)
+    ax2.add_patch(Polygon([(-20, -45), (0, -45), (0, 130), (-20, 130)], closed=True, facecolor="#f07840", edgecolor="#7a2606", alpha=0.65))
+    ax2.add_patch(Polygon([(209, -45), (229, -45), (229, 130), (209, 130)], closed=True, facecolor="#f07840", edgecolor="#7a2606", alpha=0.65))
 
-    # Main Box XZ Section + 40 mm Cradle Divider at X = 158..162 + Right Gland Boss & 45-deg Rain Hood
+    # Lower Back Mounting Apron behind Gussets (X = 0..209, Z = -45..0)
+    ax2.add_patch(Polygon([(0, -45), (209, -45), (209, 0), (0, 0)], closed=True, facecolor="#fed7aa", edgecolor="#9a3412", alpha=0.55))
+
+    # 5x 6.0 mm Under-Battery Gussets (Z = -45..0) + 45° Corbel Arches
+    gusset_xs = (0.0, 51.0, 103.0, 156.0, 203.0)
+    for gx in gusset_xs:
+        ax2.add_patch(Polygon([(gx, -45), (gx + 6, -45), (gx + 6, 0), (gx, 0)], closed=True, facecolor="#c2410c", edgecolor="#7a2606", lw=1.2))
+    for i in range(4):
+        x_l = gusset_xs[i] + 6.0
+        x_r = gusset_xs[i + 1]
+        xm = 0.5 * (x_l + x_r)
+        hw = 0.5 * (x_r - x_l)
+        ax2.add_patch(Polygon([(x_l, -hw), (xm, 0), (x_r, -hw), (x_r, 0), (x_l, 0)], closed=True, facecolor="#ea580c", edgecolor="#7a2606", lw=1.0))
+
+    # Main Box XZ Section + 40 mm Cradle Divider at X = 158..162 (No external gland boss/roof!)
     box_xz = [
-        (0, 0), (209, 0), (209, 6), (218, 15), (218, 37), (225, 37), (225, 41), (209, 55),
-        (209, 152), (206.8, 152), (206.8, 162), (204, 162), (204, 5),
-        (162, 5), (162, 45), (158, 45), (158, 5), (5, 5), (5, 162), (2.2, 162), (2.2, 152), (0, 152),
+        (0, 0), (209, 0), (209, 152), (206.8, 152), (206.8, 160), (204, 160), (204, 5),
+        (162, 5), (162, 45), (158, 45), (158, 5), (5, 5), (5, 160), (2.2, 160), (2.2, 152), (0, 152),
     ]
     ax2.add_patch(Polygon(box_xz, closed=True, facecolor="#d9541f", edgecolor="#7a2606", lw=1.4))
 
-    # Gland Cap (X = 218.5 .. 225.5, Z = 15 .. 37)
-    ax2.add_patch(Polygon([(218.5, 15), (225.5, 15), (225.5, 37), (218.5, 37)], closed=True, facecolor="#f27441", edgecolor="#7a2606", lw=1.2))
+    # Direct 10 AWG Wire Holes in Right Wall (X = 204..209, Z = 23.1..28.9)
+    ax2.add_patch(Polygon([(204, 23.1), (209, 23.1), (209, 28.9), (204, 28.9)], closed=True, facecolor="white", edgecolor="#333", lw=1.0))
 
     # 3x Floor Ribs (Z = 5..8)
     for rx in (24.0, 81.5, 139.0):
@@ -199,38 +216,41 @@ def render_cross_section(path: str) -> None:
     ax2.add_patch(Polygon([(138, 119), (148, 119), (148, 127), (138, 127)], closed=True, facecolor="#e02828", edgecolor="#700"))
     ax2.text(81.5, 62, "Mighty Max 12V 10Ah (ML10-12)\n151.0 × 65.0 × 111.0 mm Case\n(153.0 mm Snug Cradle Pocket)", ha="center", va="center", color="white", fontsize=9.5, fontweight="bold")
 
-    # Wire Stuffing Bay Highlight (X = 162..204, Z = 5..162)
-    ax2.add_patch(Polygon([(162, 5), (204, 5), (204, 162), (162, 162)], closed=True, facecolor="#fef08a", edgecolor="none", alpha=0.35))
-    ax2.text(183, 82, "Excess Wire\n& Fuse Bay\n(42 × 67 × 157 mm)\n+ Zip-Tie Anchors", ha="center", va="center", fontsize=8.5, fontweight="bold", color="#713f12")
+    # Wire Stuffing Bay Highlight (X = 162..204, Z = 5..160)
+    ax2.add_patch(Polygon([(162, 5), (204, 5), (204, 160), (162, 160)], closed=True, facecolor="#fef08a", edgecolor="none", alpha=0.35))
+    ax2.text(183, 82, "Excess Wire\n& Fuse Bay\n(42 × 67 × 155 mm)\n+ Zip-Tie Anchors", ha="center", va="center", fontsize=8.5, fontweight="bold", color="#713f12")
 
-    # 2x 10 AWG Wires routing from terminal to gland (Z = 26)
-    ax2.plot([143, 185, 185, 232], [126, 126, 26, 26], color="#dc2626", lw=3.2, label="10 AWG +12V")
-    ax2.plot([143, 174, 174, 232], [123, 123, 28, 28], color="#1f2937", lw=3.2, label="10 AWG GND")
+    # 2x 10 AWG Wires routing from terminal directly through right-wall holes (Z = 26)
+    ax2.plot([143, 185, 185, 224], [126, 126, 26, 26], color="#dc2626", lw=3.2, label="10 AWG +12V")
+    ax2.plot([143, 174, 174, 224], [123, 123, 28, 28], color="#1f2937", lw=3.2, label="10 AWG GND")
 
     # Overhang Lid XZ Section (X = -12..221, Z = 138..174)
     lid_xz = [
         (-12, 174), (221, 174), (221, 138), (217.5, 138), (217.5, 141), (214.3, 141), (214.3, 138),
-        (209.6, 138), (209.6, 152.6), (207.4, 152.6), (207.4, 163),
-        (1.6, 163), (1.6, 152.6), (-0.6, 152.6), (-0.6, 138),
+        (209.6, 138), (209.6, 152.6), (207.4, 152.6), (207.4, 160.4),
+        (1.6, 160.4), (1.6, 152.6), (-0.6, 152.6), (-0.6, 138),
         (-5.3, 138), (-5.3, 141), (-8.5, 141), (-8.5, 138), (-12, 138),
     ]
     ax2.add_patch(Polygon(lid_xz, closed=True, facecolor="#38424d", edgecolor="#181d24", lw=1.4, alpha=0.9))
 
-    # Mounting Screw Holes on Flanges
+    # Mounting Screw Holes on Flanges & Under-Battery Apron (Z = -26 mm, 35 mm, 96/105 mm keyhole)
     for sx in (-10.0, 219.0):
-        ax2.add_patch(Circle((sx, 28.0), 2.6, facecolor="white", edgecolor="#333"))
-        ax2.add_patch(Circle((sx, 105.0), 2.6, facecolor="white", edgecolor="#333"))
-        ax2.add_patch(Circle((sx, 96.0), 5.2, facecolor="white", edgecolor="#333"))
+        ax2.add_patch(Circle((sx, -26.0), 2.6, facecolor="white", edgecolor="#333", lw=1.2))
+        ax2.add_patch(Circle((sx, 35.0), 2.6, facecolor="white", edgecolor="#333", lw=1.2))
+        ax2.add_patch(Circle((sx, 105.0), 2.6, facecolor="white", edgecolor="#333", lw=1.2))
+        ax2.add_patch(Circle((sx, 96.0), 5.2, facecolor="white", edgecolor="#333", lw=1.2))
+    for cx_low in (80.0, 132.5):
+        ax2.add_patch(Circle((cx_low, -26.0), 2.6, facecolor="white", edgecolor="#333", lw=1.2))
 
-    ax2.annotate("2× 10 AWG Split Gland\n+ 45° Rain/Snow Hood", xy=(222, 37), xytext=(175, -22),
+    ax2.annotate("2× Ø5.8 mm Direct\n10 AWG Wire Holes", xy=(209, 26), xytext=(168, -54),
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#1d4ed8"), fontsize=8.5, fontweight="bold", color="#1d4ed8")
-    ax2.annotate("+12 mm Side Overhang\n+ M4 Locking Screw", xy=(-12, 145), xytext=(-28, 190),
+    ax2.annotate("5× 6 mm Gussets + 4× Lower\n#10 Screws at Z = -26 mm", xy=(80, -26), xytext=(22, -55),
+                 arrowprops=dict(arrowstyle="->", lw=1.2, color="#7a2606"), fontsize=8.5, fontweight="bold", color="#7a2606")
+    ax2.annotate("+12 mm Side Overhang\n+ M4 Locking Screw", xy=(-12, 145), xytext=(-28, 188),
                  arrowprops=dict(arrowstyle="->", lw=1.2, color="#1d4ed8"), fontsize=8.5, fontweight="bold", color="#1d4ed8")
-    ax2.annotate("Keyhole Mount\n(#10 Wood Screw)", xy=(-10, 100), xytext=(-28, 60),
-                 arrowprops=dict(arrowstyle="->", lw=1.2, color="#7a2606"), fontsize=8.0, fontweight="bold", color="#7a2606")
 
     ax2.set_xlim(-32, 242)
-    ax2.set_ylim(-30, 206)
+    ax2.set_ylim(-60, 206)
     ax2.set_aspect("equal")
     ax2.set_xlabel("X Width Across Planter Back (mm)")
     ax2.set_ylabel("Z Elevation (mm)")
@@ -251,7 +271,7 @@ def render_h2d_plate(path: str) -> None:
 
     # --- Panel 1: 3D Isometric View of `plate_h2d_all_in_one.stl` on the 350 x 320 mm H2D Bed ---
     ax1 = fig.add_subplot(1, 2, 1, projection="3d")
-    ax1.set_title("Bambu Lab H2D (350 × 320 mm Bed) — Single-Plate All-in-One Layout", fontsize=11, fontweight="bold", pad=10)
+    ax1.set_title("Bambu Lab H2D (350 × 320 mm Bed) — 2-Part Single-Plate Layout", fontsize=11, fontweight="bold", pad=10)
 
     # Draw 350 x 320 mm H2D build plate border & 50 mm grid lines at Z = 0 (avoids 3D painter's sort overlap)
     ax1.plot([0, 350, 350, 0, 0], [0, 0, 320, 320, 0], [0, 0, 0, 0, 0], color="#1e293b", lw=2.2)
@@ -260,16 +280,15 @@ def render_h2d_plate(path: str) -> None:
     for gy in range(50, 320, 50):
         ax1.plot([0, 350], [gy, gy], [0, 0], color="#94a3b8", lw=0.6, ls=":")
 
-    # Center the 271 x 192.9 mm layout on the 350 x 320 mm H2D bed: offset = (39.5, 63.5)
-    off_x, off_y = 39.5, 63.5
+    # Center the 249 x 194.9 mm layout on the 350 x 320 mm H2D bed: offset = (50.5, 62.5)
+    off_x, off_y = 50.5, 62.5
     part_specs = [
         ("print_battery_box.stl", (off_x + 0.0, off_y + 0.0), (0.85, 0.33, 0.12, 1.0)),
-        ("print_overhang_lid.stl", (off_x + 8.0, off_y + 94.0), (0.28, 0.33, 0.39, 1.0)),
-        ("print_wire_gland_cap.stl", (off_x + 249.0, off_y + 123.0), (0.94, 0.45, 0.18, 1.0)),
+        ("print_overhang_lid.stl", (off_x + 8.0, off_y + 96.0), (0.28, 0.33, 0.39, 1.0)),
     ]
     for fn, (px, py), rgba in part_specs:
         raw_tris = plates.translate(plates.normalise(plates.read_stl(os.path.join(box.STL_DIR, fn))), px, py, 0.0)
-        tri = np.array(raw_tris, dtype=float)
+        tri = subdivide(np.array(raw_tris, dtype=float), max_edge=18.0)
         n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
         n /= np.linalg.norm(n, axis=1, keepdims=True) + 1e-9
         shade = 0.55 + 0.45 * np.clip(n @ LIGHT, 0.0, 1.0)
@@ -280,9 +299,9 @@ def render_h2d_plate(path: str) -> None:
 
     ax1.set_xlim(-10, 360)
     ax1.set_ylim(-10, 330)
-    ax1.set_zlim(0, 180)
-    ax1.set_box_aspect((370, 340, 180), zoom=1.08)
-    ax1.view_init(elev=28, azim=-58)
+    ax1.set_zlim(0, 215)
+    ax1.set_box_aspect((370, 340, 215), zoom=1.08)
+    ax1.view_init(elev=30, azim=48)
     ax1.set_proj_type("ortho")
     ax1.set_axis_off()
 
@@ -297,23 +316,17 @@ def render_h2d_plate(path: str) -> None:
     for gy in range(50, 320, 50):
         ax2.plot([0, 350], [gy, gy], color="#334155", lw=0.7, ls="--")
 
-    # Part 1: Battery Box (249 x 80 x 160 mm)
+    # Part 1: Battery Box (249 x 80 x 205 mm)
     bx0, by0 = off_x, off_y
     ax2.add_patch(Polygon([(bx0, by0), (bx0 + 249, by0), (bx0 + 249, by0 + 80), (bx0, by0 + 80)], closed=True, facecolor="#ea580c", edgecolor="#fdba74", lw=1.6, alpha=0.9))
-    ax2.text(bx0 + 124.5, by0 + 40, "1. print_battery_box.stl\n249.0 × 80.0 × 160.0 mm\n(Floor flat on z=0 · 45° gussets & hood · 0 supports)", ha="center", va="center", color="white", fontsize=8.5, fontweight="bold")
+    ax2.text(bx0 + 124.5, by0 + 40, "1. print_battery_box.stl\n249.0 × 80.0 × 205.0 mm\n(Gusset feet & lower apron on z=0 · 45° corbels · 0 supports)", ha="center", va="center", color="white", fontsize=8.5, fontweight="bold")
 
     # Part 2: Overhang Lid (233 x 98.9 x 41.6 mm)
-    lx0, ly0 = off_x + 8.0, off_y + 94.0
+    lx0, ly0 = off_x + 8.0, off_y + 96.0
     ax2.add_patch(Polygon([(lx0, ly0), (lx0 + 233, ly0), (lx0 + 233, ly0 + 98.9), (lx0, ly0 + 98.9)], closed=True, facecolor="#475569", edgecolor="#cbd5e1", lw=1.6, alpha=0.92))
     ax2.text(lx0 + 116.5, ly0 + 49.5, "2. print_overhang_lid.stl\n233.0 × 98.9 × 41.6 mm\n(Upside-down on sloped roof z=0 · Parallel ceiling z=6.0 · 0 supports)", ha="center", va="center", color="white", fontsize=8.5, fontweight="bold")
 
-    # Part 3: 10AWG Wire Gland Cap (22 x 40 x 8.5 mm)
-    cx0, cy0 = off_x + 249.0, off_y + 123.0
-    ax2.add_patch(Polygon([(cx0, cy0), (cx0 + 22, cy0), (cx0 + 22, cy0 + 40), (cx0, cy0 + 40)], closed=True, facecolor="#f97316", edgecolor="#fed7aa", lw=1.5, alpha=0.95))
-    ax2.annotate("3. print_wire_gland_cap.stl\n22.0 × 40.0 × 8.5 mm\n(Outer face on z=0)", xy=(cx0 + 11, cy0 + 40), xytext=(cx0 - 45, cy0 + 95),
-                 arrowprops=dict(arrowstyle="->", lw=1.4, color="#fb923c"), color="#fed7aa", fontsize=8.5, fontweight="bold")
-
-    ax2.text(175, 18, "Bambu Lab H2D Build Plate: 350 × 320 mm (Packed Envelope: 271 × 193 mm · +79 mm X / +127 mm Y Margin)", ha="center", va="center", color="#94a3b8", fontsize=8.5, fontweight="bold")
+    ax2.text(175, 18, "Bambu Lab H2D Build Plate: 350 × 320 mm (Packed Envelope: 249 × 195 mm · +101 mm X / +125 mm Y Margin)", ha="center", va="center", color="#94a3b8", fontsize=8.5, fontweight="bold")
     ax2.set_xlim(-10, 360)
     ax2.set_ylim(-10, 330)
     ax2.set_aspect("equal")
@@ -335,7 +348,7 @@ if __name__ == "__main__":
         os.path.join(box.RENDERS_DIR, "iso-assembled.png"),
         elev=24,
         azim=52,
-        title="Aggie Cold Box 12V 10Ah Battery Enclosure: Mounted on Cedar Back Wall (Overhang Drip Lid & 2× 10AWG Gland)",
+        title="Aggie Cold Box 12V 10Ah Battery Enclosure: Overhang Drip Lid, 5× Under-Battery Gussets & Direct 10AWG Wire Holes",
     )
     render_3d(
         asm,
@@ -343,7 +356,7 @@ if __name__ == "__main__":
         elev=46,
         azim=52,
         hide=("print_overhang_lid",),
-        title="Lid Off: Mighty Max 12V 10Ah in Left Cradle Bay, 42 mm Wire-Stuffing Bay on Right, 10 mm Labyrinth Rim & 10AWG Gland",
+        title="Lid Off: Mighty Max 12V 10Ah in Left Cradle Bay, 42 mm Wire-Stuffing Bay on Right, Under-Battery Gussets & Direct Wire Holes",
     )
     render_3d(
         asm,
@@ -360,7 +373,7 @@ if __name__ == "__main__":
         azim=-60,
         hide=("planter_cedar_wall",),
         opaque=("print_overhang_lid",),
-        title="Rear Mounting View: 4× 3.0 mm Cedar-Wall Drainage Standoffs, Upper Drop-On Keyholes & Lower #10 Screw Holes",
+        title="Rear Mounting View: 5× Under-Battery Gussets, Extended Lower #10 Screw Holes (Z = -26 mm) & Upper Drop-On Keyholes",
     )
     render_cross_section(os.path.join(box.RENDERS_DIR, "cross-section-drip.png"))
     render_h2d_plate(os.path.join(box.RENDERS_DIR, "h2d-print-plate.png"))

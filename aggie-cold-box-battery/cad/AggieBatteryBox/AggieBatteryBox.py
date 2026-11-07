@@ -1,7 +1,7 @@
 # Author: Dan Gorman / Antigravity CAD Generator
 # Description: Parametric Autodesk Fusion assembly generator for the Backyard Discovery
 #              Aggie Cold Box 12V 10Ah (Mighty Max ML10-12) Weatherproof Battery Enclosure,
-#              Sloped Snow/Rain Overhang Drip Lid, and 2x 10 AWG Actuator Wire Gland.
+#              Under-Battery Support Gussets, Sloped Snow/Rain Overhang Drip Lid, and 2x 10 AWG Wire Holes.
 
 import traceback
 import adsk.core
@@ -20,7 +20,7 @@ BATT_CLEAR_XY: float = 1.0          # 1.0 mm per-side pocket clearance
 
 # Main Enclosure Structural Envelope
 WALL_T: float = 5.0                 # 5.0 mm heavy-duty outdoor wall thickness
-FLOOR_T: float = 5.0                # 5.0 mm structural floor thickness
+FLOOR_T: float = 5.0                # 5.0 mm structural floor thickness (Z = 0.0 .. 5.0)
 FLOOR_RIB_H: float = 3.0            # 3.0 mm raised floor support/drainage ribs under battery
 BATT_Z0: float = FLOOR_T + FLOOR_RIB_H  # 8.0 mm battery resting elevation
 
@@ -38,39 +38,45 @@ SPLASH_LIP_H_Z: float = 8.0         # 8.0 mm tall raised inner labyrinth splash 
 SPLASH_LIP_STEP: float = 2.2        # 2.2 mm outer step-in (lip thickness = 2.8 mm)
 BOX_TOTAL_H_Z: float = BOX_SHOULDER_Z + SPLASH_LIP_H_Z                            # 160.0 mm
 
-# Rear Planter-Wall Drainage Standoffs & Side Mounting Flanges
+# Under-Battery Support Gussets & Extended Lower Mounting Flange (Z = -45.0 .. 0.0 mm)
+UNDER_GUSSET_H_Z: float = 45.0      # Extends 45.0 mm below the Z = 0.0 floor (down to Z = -45.0 mm)
+UNDER_GUSSET_T_X: float = 6.0       # 6.0 mm thick structural gusset ribs
+UNDER_GUSSET_FOOT_Y: float = 32.0   # Flat foot from Y = -3.0 to Y = 32.0 at Z = -45.0, then 45-deg slope to (Y = 77.0, Z = 0.0)
+GUSSET_X_POSITIONS: tuple[float, ...] = (
+    0.0,                            # Left outer wall gusset (X = 0..6)
+    51.0,                           # Under-battery left-center gusset (X = 51..57)
+    103.0,                          # Under-battery right-center gusset (X = 103..109)
+    156.0,                          # Under battery divider wall gusset (X = 156..162)
+    BOX_WIDTH_X - UNDER_GUSSET_T_X, # Right outer wall gusset (X = 203..209)
+)
+
+# Rear Planter-Wall Drainage Standoffs & Extended Side/Lower Mounting Flanges
 STANDOFF_DEPTH_Y: float = 3.0       # 3.0 mm drainage/airflow gap behind box (Y = -3.0 .. 0.0)
 STANDOFF_W_X: float = 10.0          # 10.0 mm wide vertical standoff ribs
 STANDOFF_TOP_Z: float = 136.0       # Ends 2.0 mm below lid skirt (Z = 138.0)
 
 FLANGE_W_X: float = 20.0            # 20.0 mm wide left/right mounting ears (X = -20..0, 209..229)
 FLANGE_T_Y: float = STANDOFF_DEPTH_Y + WALL_T  # 8.0 mm thick solid flange (Y = -3.0 .. 5.0)
-FLANGE_H_Z: float = 130.0           # Z = 0.0 .. 130.0 mm (8.0 mm below lid skirt)
+FLANGE_Z0: float = -UNDER_GUSSET_H_Z           # -45.0 mm (extends 45 mm below box floor!)
+FLANGE_TOP_Z: float = 130.0         # Z = -45.0 .. +130.0 mm (175.0 mm total vertical span)
 SCREW_CLEAR_DIA: float = 5.2        # #10 stainless wood screw clearance (mm)
 SCREW_CBORE_DIA: float = 10.5       # Washer/pan-head counterbore & keyhole entry diameter
-SCREW_LOWER_Z: float = 28.0         # Lower locking screw elevation
+SCREW_LOWER_Z: float = -26.0        # Extended down below the battery floor (Z = -26.0 mm) for direct support!
 SCREW_UPPER_Z: float = 105.0        # Upper keyhole screw elevation
 
 # Fastener & Heat-Set Insert Specifications
 M4_CLEAR_DIA: float = 4.5           # M4 clearance hole (mm)
 M4_CBORE_DIA: float = 8.6           # M4 button-head counterbore diameter (mm)
 M4_INSERT_BORE_DIA: float = 5.6     # McMaster 94180A353 M4 tapered heat-set insert bore
-M4_INSERT_DEPTH: float = 9.0        # Blind bore depth for M4 insert
 LID_M4_Z: float = 145.0             # Side M4 lid locking screw elevation
 LID_M4_Y: float = 38.5              # Centered on box depth (77.0 / 2)
 
-# 2x 10 AWG Split Compression Wire Gland & 45-deg Snow/Rain Drip Hood (Right Wall)
+# Direct 2x 10 AWG Wire Exit Holes through Right Wall (No external gland boss or hood)
 WIRE_10AWG_OD: float = 5.0          # Insulated 10 AWG wire jacket OD
-WIRE_BORE_DIA: float = 5.2          # Clamping channel diameter for 10 AWG wire
-GLAND_CENTER_Y: float = 44.0        # Forward of right mounting flange gussets
-GLAND_CENTER_Z: float = 26.0        # Low on wiring bay for natural downward drip loop
-GLAND_WIRE_SPAN_Y: float = 12.0     # Wire centers at Y = 38.0 and Y = 50.0 mm
-GLAND_BOLT_SPAN_Y: float = 30.0     # M4 insert centers at Y = 29.0 and Y = 59.0 mm
-GLAND_BOSS_W_Y: float = 40.0        # Boss spans Y = 24.0 .. 64.0 mm
-GLAND_BOSS_H_Z: float = 22.0        # Flat boss face spans Z = 15.0 .. 37.0 mm
-GLAND_BOSS_DX: float = 9.0          # Boss projects +9.0 mm from X = 209.0 to X = 218.0 mm
-GLAND_CAP_DX: float = 7.0           # Bolt-on cap thickness (X = 218.5 .. 225.5 mm)
-GLAND_HOOD_DX: float = 16.0         # Upper rain hood projects to X = 225.0 mm (covers boss + cap)
+WIRE_HOLE_DIA: float = 5.8          # Clean 5.8 mm pass-through holes in right wall
+WIRE_EXIT_CENTER_Y: float = 44.0    # Centered in wiring bay depth
+WIRE_EXIT_CENTER_Z: float = 26.0    # Low on right wall of wiring bay
+WIRE_EXIT_SPAN_Y: float = 14.0      # Wire centers at Y = 37.0 and Y = 51.0 mm
 
 # Weatherproof Overhang Lid (Sloped Shed Roof + Eaves + Undercut Drip Groove)
 LID_OVERHANG_SIDE_X: float = 12.0   # 12.0 mm overhang left (X = -12.0) and right (X = 221.0)
@@ -82,10 +88,9 @@ LID_RIGHT_X1: float = BOX_WIDTH_X + LID_OVERHANG_SIDE_X   # 221.0 mm
 LID_WIDTH_X: float = LID_RIGHT_X1 - LID_LEFT_X0           # 233.0 mm
 LID_DEPTH_Y: float = LID_FRONT_Y1 - LID_BACK_Y0           # 94.0 mm
 
-LID_SKIRT_Z0: float = 138.0         # Bottom of outer drip skirt (24 mm below Z = 162 rim)
+LID_SKIRT_Z0: float = 138.0         # Bottom of outer drip skirt (22 mm below Z = 160 rim)
 LID_ROOF_FRONT_Z: float = 167.0     # Top of roof at front eave (Y = 91.0 mm)
 LID_ROOF_BACK_Z: float = 180.0      # Top of roof at back wall (Y = -3.0 mm -> 8-deg shed slope!)
-LID_CEIL_Z: float = 163.0           # Inner flat ceiling (1.0 mm above Z = 162 splash lip)
 LID_COLLAR_CLEAR: float = 0.6       # 0.6 mm per-side slip fit around box walls
 DRIP_LIP_W: float = 3.5             # Outer drip bead width
 DRIP_GROOVE_W: float = 3.2          # Undercut drip channel width
@@ -128,12 +133,13 @@ def register_user_parameters(design: adsk.fusion.Design) -> None:
         ("BATT_TOTAL_H_Z", BATT_TOTAL_H_Z, "mm", "Mighty Max 12V 10Ah height over F2 terminals"),
         ("WIRE_BAY_W_X", WIRE_BAY_W_X, "mm", "Side wire & fuse stuffing compartment width"),
         ("OVERHEAD_WIRE_H_Z", OVERHEAD_WIRE_H_Z, "mm", "Overhead wire clearance above F2 terminals"),
+        ("UNDER_GUSSET_H_Z", UNDER_GUSSET_H_Z, "mm", "Under-battery support gusset & lower flange depth"),
+        ("SCREW_LOWER_Z", abs(SCREW_LOWER_Z), "mm", "Lower mounting screw distance below floor"),
         ("BOX_WIDTH_X", BOX_WIDTH_X, "mm", "Main enclosure outer width (excluding mounting flanges)"),
         ("BOX_DEPTH_Y", BOX_DEPTH_Y, "mm", "Main enclosure outer depth (excluding rear standoffs)"),
-        ("BOX_TOTAL_H_Z", BOX_TOTAL_H_Z, "mm", "Main enclosure height to top of labyrinth splash lip"),
         ("LID_OVERHANG_SIDE_X", LID_OVERHANG_SIDE_X, "mm", "Lid snow/water overhang per side"),
         ("LID_OVERHANG_FRONT_Y", LID_OVERHANG_FRONT_Y, "mm", "Lid snow/water overhang at front eave"),
-        ("WIRE_BORE_DIA", WIRE_BORE_DIA, "mm", "10 AWG actuator wire gland channel diameter"),
+        ("WIRE_HOLE_DIA", WIRE_HOLE_DIA, "mm", "10 AWG actuator wire exit hole diameter"),
     ]
     user_params = design.userParameters
     for name, number, unit, comment in params:
@@ -417,7 +423,7 @@ def build_planter_wall_component(
     plank_w_x = 300.0
     x0 = BOX_WIDTH_X / 2.0 - plank_w_x / 2.0
     y0 = -STANDOFF_DEPTH_Y - plank_thick
-    for idx, (z0, h) in enumerate(((-20.0, 72.0), (53.5, 72.0), (127.0, 72.0))):
+    for idx, (z0, h) in enumerate(((-60.0, 72.0), (13.5, 72.0), (87.0, 72.0), (160.5, 35.0))):
         board = add_box_feature(
             comp, x0, y0, z0, plank_w_x, plank_thick, h,
             body_name=f"aggie_cedar_plank_{idx}",
@@ -431,33 +437,30 @@ def build_battery_box_component(
     design: adsk.fusion.Design,
     root: adsk.fusion.Component,
 ) -> adsk.fusion.Component:
-    """01_Battery_Box_Enclosure: Main 3D-printed enclosure body with battery cradle, wire bay, flanges & gland boss."""
+    """01_Battery_Box_Enclosure: Main 3D-printed enclosure body with under-battery gussets, wire bay & direct wire holes."""
     comp = create_subcomponent(root, "01_Battery_Box_Enclosure")
 
-    # 1. Main outer box shell (X: 0..209, Y: 0..77, Z: 0..162)
+    # 1. Main upper outer box shell (X: 0..209, Y: 0..77, Z: 0..160)
     box = add_box_feature(
         comp, 0.0, 0.0, 0.0, BOX_WIDTH_X, BOX_DEPTH_Y, BOX_TOTAL_H_Z,
         body_name="print_battery_box",
     )
 
-    # 2. Cut outer top shoulder around Left, Right, and Front (Z: 152..162) to form 10 mm raised inner labyrinth splash lip
-    # Left shoulder cut (X: 0..2.2)
+    # 2. Cut outer top shoulder around Left, Right, and Front (Z: 152..160) to form 8 mm raised inner labyrinth splash lip
     add_box_feature(
         comp, -0.5, -0.5, BOX_SHOULDER_Z, SPLASH_LIP_STEP + 0.5, BOX_DEPTH_Y + 1.0, SPLASH_LIP_H_Z + 1.0,
         adsk.fusion.FeatureOperations.CutFeatureOperation, box,
     )
-    # Right shoulder cut (X: 206.8..209)
     add_box_feature(
         comp, BOX_WIDTH_X - SPLASH_LIP_STEP, -0.5, BOX_SHOULDER_Z, SPLASH_LIP_STEP + 0.5, BOX_DEPTH_Y + 1.0, SPLASH_LIP_H_Z + 1.0,
         adsk.fusion.FeatureOperations.CutFeatureOperation, box,
     )
-    # Front shoulder cut (Y: 74.8..77)
     add_box_feature(
         comp, -0.5, BOX_DEPTH_Y - SPLASH_LIP_STEP, BOX_SHOULDER_Z, BOX_WIDTH_X + 1.0, SPLASH_LIP_STEP + 0.5, SPLASH_LIP_H_Z + 1.0,
         adsk.fusion.FeatureOperations.CutFeatureOperation, box,
     )
 
-    # 3. Cut main interior cavity (X: 5..204, Y: 5..72, Z: 5..162)
+    # 3. Cut main interior cavity (X: 5..204, Y: 5..72, Z: 5..160)
     add_box_feature(
         comp, WALL_T, WALL_T, FLOOR_T, BOX_WIDTH_X - 2.0 * WALL_T, INNER_DEPTH_Y, BOX_TOTAL_H_Z,
         adsk.fusion.FeatureOperations.CutFeatureOperation, box,
@@ -498,26 +501,62 @@ def build_battery_box_component(
             adsk.fusion.FeatureOperations.CutFeatureOperation, box,
         )
 
-    # 7. 4x Rear Planter-Wall Drainage Standoff Ribs (Y: -3..0, Z: 0..136, width 10 mm)
+    # 7. Under-Battery Support Gussets & Extended Lower Mounting Apron (Z = -45.0 .. 0.0 mm)
+    under_hull_pts = [
+        (0.0, -STANDOFF_DEPTH_Y, -UNDER_GUSSET_H_Z),
+        (0.0, UNDER_GUSSET_FOOT_Y, -UNDER_GUSSET_H_Z),
+        (0.0, BOX_DEPTH_Y, 0.0),
+        (0.0, -STANDOFF_DEPTH_Y, 0.0),
+    ]
+    add_polygon_extrusion(
+        comp, "x", 0.0, BOX_WIDTH_X, under_hull_pts,
+        adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
+    )
+
+    # Carve the 4 inter-gusset bays with 45-deg gabled corbel arches (in front of Y = 5.0 mm back mounting apron)
+    for idx in range(len(GUSSET_X_POSITIONS) - 1):
+        bay_x0 = GUSSET_X_POSITIONS[idx] + UNDER_GUSSET_T_X
+        bay_x1 = GUSSET_X_POSITIONS[idx + 1]
+        bay_xm = 0.5 * (bay_x0 + bay_x1)
+        half_w = 0.5 * (bay_x1 - bay_x0)
+        gable_pts = [
+            (bay_x0, WALL_T, -UNDER_GUSSET_H_Z - 1.0),
+            (bay_x1, WALL_T, -UNDER_GUSSET_H_Z - 1.0),
+            (bay_x1, WALL_T, -half_w),
+            (bay_xm, WALL_T, 0.0),
+            (bay_x0, WALL_T, -half_w),
+        ]
+        add_polygon_extrusion(
+            comp, "y", WALL_T, BOX_DEPTH_Y + 2.0, gable_pts,
+            adsk.fusion.FeatureOperations.CutFeatureOperation, box,
+        )
+
+    # Carve rear drainage channels (Y = -3.0 .. 0.0 mm) between the 4 rear standoff ribs down through Z = -45..0
+    for cx0, cx1 in ((0.0, 5.0), (15.0, 70.0), (80.0, 129.0), (139.0, 194.0), (204.0, 209.0)):
+        add_box_feature(
+            comp, cx0, -STANDOFF_DEPTH_Y, -UNDER_GUSSET_H_Z - 0.5, cx1 - cx0, STANDOFF_DEPTH_Y, UNDER_GUSSET_H_Z + 1.0,
+            adsk.fusion.FeatureOperations.CutFeatureOperation, box,
+        )
+
+    # 8. 4x Rear Planter-Wall Drainage Standoff Ribs on upper box (Y: -3..0, Z: 0..136, width 10 mm)
     for sx in (10.0, 75.0, 134.0, 199.0):
         add_box_feature(
             comp, sx - STANDOFF_W_X / 2.0, -STANDOFF_DEPTH_Y, 0.0, STANDOFF_W_X, STANDOFF_DEPTH_Y, STANDOFF_TOP_Z,
             adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
         )
 
-    # 8. Left & Right Gusseted Planter Mounting Flanges (X: -20..0 and 209..229, Y: -3..5, Z: 0..130)
+    # 9. Left & Right Extended Planter Mounting Flanges (X: -20..0 and 209..229, Y: -3..5, Z: -45..130)
     for side_sign, fx0, fx_center, wall_x in (
         (-1.0, -FLANGE_W_X, -FLANGE_W_X / 2.0, 0.0),
         (+1.0, BOX_WIDTH_X, BOX_WIDTH_X + FLANGE_W_X / 2.0, BOX_WIDTH_X),
     ):
         add_box_feature(
-            comp, fx0, -STANDOFF_DEPTH_Y, 0.0, FLANGE_W_X, FLANGE_T_Y, FLANGE_H_Z,
+            comp, fx0, -STANDOFF_DEPTH_Y, FLANGE_Z0, FLANGE_W_X, FLANGE_T_Y, FLANGE_TOP_Z - FLANGE_Z0,
             adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
         )
-        # Bottom Gusset (Z: 0..6) + Mid Gusset with 45-deg support-free lower bevel (Z: 50..68)
         gx0 = wall_x - 12.0 if side_sign < 0 else wall_x
         add_box_feature(
-            comp, gx0, WALL_T, 0.0, 12.0, 12.0, 6.0,
+            comp, gx0, WALL_T, FLANGE_Z0, 12.0, 12.0, 6.0,
             adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
         )
         mid_g_pts = [
@@ -531,7 +570,7 @@ def build_battery_box_component(
             adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
         )
 
-        # Lower #10 wood-screw through-hole + front counterbore (Z = 28.0) and Upper Keyhole (Z = 105.0 & 96.0)
+        # Lower #10 wood-screw hole extended DOWN below the battery floor (Z = -26.0 mm) + Upper Keyhole (Z = 105.0)
         cut_cylinders_on_plane(
             comp, box, "y", -STANDOFF_DEPTH_Y - 1.0, FLANGE_T_Y + 3.0,
             [
@@ -547,7 +586,6 @@ def build_battery_box_component(
                 (fx_center, WALL_T - 2.5, SCREW_UPPER_Z, SCREW_CBORE_DIA / 2.0),
             ],
         )
-        # Keyhole connecting slot + front recess
         add_box_feature(
             comp, fx_center - SCREW_CLEAR_DIA / 2.0, -STANDOFF_DEPTH_Y - 0.5, SCREW_UPPER_Z - 9.0,
             SCREW_CLEAR_DIA, FLANGE_T_Y + 1.0, 9.0,
@@ -559,51 +597,34 @@ def build_battery_box_component(
             adsk.fusion.FeatureOperations.CutFeatureOperation, box,
         )
 
-    # 9. Right-Side 2x 10 AWG Wire Gland Boss + 45-deg Support-Free Lower Chamfer & 45-deg Upper Rain Hood
-    y_boss0 = GLAND_CENTER_Y - GLAND_BOSS_W_Y / 2.0  # 24.0 mm
-    boss_and_hood_pts = [
-        (BOX_WIDTH_X, y_boss0, 6.0),
-        (BOX_WIDTH_X + GLAND_BOSS_DX, y_boss0, 15.0),
-        (BOX_WIDTH_X + GLAND_BOSS_DX, y_boss0, 37.0),
-        (BOX_WIDTH_X + GLAND_HOOD_DX, y_boss0, 44.0),
-        (BOX_WIDTH_X + GLAND_HOOD_DX, y_boss0, 47.0),
-        (BOX_WIDTH_X, y_boss0, 63.0),
-    ]
-    add_polygon_extrusion(
-        comp, "y", y_boss0, GLAND_BOSS_W_Y, boss_and_hood_pts,
-        adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
-    )
-
-    # Cut 2x 5.2 mm 10 AWG wire channels through right wall + boss
-    wy1 = GLAND_CENTER_Y - GLAND_WIRE_SPAN_Y / 2.0
-    wy2 = GLAND_CENTER_Y + GLAND_WIRE_SPAN_Y / 2.0
+    # Also cut 2x Center Under-Battery #10 Mounting Holes in the lower back apron (X = 80.0 & 132.5, Z = -26.0)
     cut_cylinders_on_plane(
-        comp, box, "x", BOX_WIDTH_X - WALL_T - 1.0, WALL_T + GLAND_BOSS_DX + 2.0,
+        comp, box, "y", -STANDOFF_DEPTH_Y - 1.0, FLANGE_T_Y + 3.0,
         [
-            (BOX_WIDTH_X, wy1, GLAND_CENTER_Z, WIRE_BORE_DIA / 2.0),
-            (BOX_WIDTH_X, wy2, GLAND_CENTER_Z, WIRE_BORE_DIA / 2.0),
+            (80.0, -STANDOFF_DEPTH_Y, SCREW_LOWER_Z, SCREW_CLEAR_DIA / 2.0),
+            (132.5, -STANDOFF_DEPTH_Y, SCREW_LOWER_Z, SCREW_CLEAR_DIA / 2.0),
+        ],
+    )
+    cut_cylinders_on_plane(
+        comp, box, "y", WALL_T - 2.5, 4.0,
+        [
+            (80.0, WALL_T - 2.5, SCREW_LOWER_Z, SCREW_CBORE_DIA / 2.0),
+            (132.5, WALL_T - 2.5, SCREW_LOWER_Z, SCREW_CBORE_DIA / 2.0),
         ],
     )
 
-    # Cut seal/compression pocket on boss outer face (X = 216.0 .. 218.0)
-    add_box_feature(
-        comp, BOX_WIDTH_X + GLAND_BOSS_DX - 2.0, GLAND_CENTER_Y - 10.0, GLAND_CENTER_Z - 4.0,
-        2.5, 20.0, 8.0,
-        adsk.fusion.FeatureOperations.CutFeatureOperation, box,
-    )
-
-    # Cut 2x M4 heat-set insert bores in gland boss face (Y = 29.0 & 59.0, Z = 26.0)
-    by1 = GLAND_CENTER_Y - GLAND_BOLT_SPAN_Y / 2.0
-    by2 = GLAND_CENTER_Y + GLAND_BOLT_SPAN_Y / 2.0
+    # 10. Cut 2x clean 5.8 mm 10 AWG wire holes directly through the right side wall (no boss or hood)
+    wy1 = WIRE_EXIT_CENTER_Y - WIRE_EXIT_SPAN_Y / 2.0
+    wy2 = WIRE_EXIT_CENTER_Y + WIRE_EXIT_SPAN_Y / 2.0
     cut_cylinders_on_plane(
-        comp, box, "x", BOX_WIDTH_X + GLAND_BOSS_DX - M4_INSERT_DEPTH, M4_INSERT_DEPTH + 1.0,
+        comp, box, "x", BOX_WIDTH_X - WALL_T - 1.0, WALL_T + 2.0,
         [
-            (BOX_WIDTH_X + GLAND_BOSS_DX, by1, GLAND_CENTER_Z, M4_INSERT_BORE_DIA / 2.0),
-            (BOX_WIDTH_X + GLAND_BOSS_DX, by2, GLAND_CENTER_Z, M4_INSERT_BORE_DIA / 2.0),
+            (BOX_WIDTH_X, wy1, WIRE_EXIT_CENTER_Z, WIRE_HOLE_DIA / 2.0),
+            (BOX_WIDTH_X, wy2, WIRE_EXIT_CENTER_Z, WIRE_HOLE_DIA / 2.0),
         ],
     )
 
-    # 10. Cut 2x M4 heat-set insert bores in upper Left and Right walls for Lid locking screws (Z = 145.0, Y = 38.5)
+    # 11. Cut 2x M4 heat-set insert bores in upper Left and Right walls for Lid locking screws (Z = 145.0, Y = 38.5)
     cut_cylinders_on_plane(
         comp, box, "x", -0.5, WALL_T + 1.0,
         [(0.0, LID_M4_Y, LID_M4_Z, M4_INSERT_BORE_DIA / 2.0)],
@@ -613,7 +634,7 @@ def build_battery_box_component(
         [(BOX_WIDTH_X, LID_M4_Y, LID_M4_Z, M4_INSERT_BORE_DIA / 2.0)],
     )
 
-    # 11. Cut 2x 4.0 mm Floor Condensation Weep Holes (X = 14 & 195, Y = 66)
+    # 12. Cut 2x 4.0 mm Floor Condensation Weep Holes (X = 14 & 195, Y = 66)
     cut_cylinders_on_plane(
         comp, box, "z", -0.5, FLOOR_T + 1.0,
         [
@@ -634,7 +655,6 @@ def build_overhang_lid_component(
     """02_Weatherproof_Overhang_Lid: Sloped 8-deg snow-shedding roof with 12-14 mm eaves, deep skirt & undercut drip groove."""
     comp = create_subcomponent(root, "02_Weatherproof_Overhang_Lid")
 
-    # 1. Extrude sloped shed-roof + overhang skirt profile along X (X = -12.0 .. 221.0 mm)
     lid_world_pts = [
         (LID_LEFT_X0, LID_BACK_Y0, LID_SKIRT_Z0),
         (LID_LEFT_X0, LID_FRONT_Y1, LID_SKIRT_Z0),
@@ -647,7 +667,6 @@ def build_overhang_lid_component(
         body_name="print_overhang_lid",
     )
 
-    # 2. Cut lower inner collar cavity around box outer walls (X: -0.6..209.6, Y: -0.6..77.6, Z: 138..152.6)
     low_x0 = -LID_COLLAR_CLEAR
     low_y0 = -LID_COLLAR_CLEAR
     low_w = BOX_WIDTH_X + 2.0 * LID_COLLAR_CLEAR
@@ -657,7 +676,6 @@ def build_overhang_lid_component(
         adsk.fusion.FeatureOperations.CutFeatureOperation, lid,
     )
 
-    # 3. Cut upper inner labyrinth cavity around the raised splash lip with ceiling PARALLEL to the 8-deg sloped roof
     up_x0 = SPLASH_LIP_STEP - LID_COLLAR_CLEAR
     up_y0 = -LID_COLLAR_CLEAR
     up_w = (BOX_WIDTH_X - 2.0 * SPLASH_LIP_STEP) + 2.0 * LID_COLLAR_CLEAR
@@ -675,27 +693,22 @@ def build_overhang_lid_component(
         adsk.fusion.FeatureOperations.CutFeatureOperation, lid,
     )
 
-    # 4. Cut the Undercut Perimeter Drip Groove (Z = 138.0 .. 141.0 mm) on Left, Right, and Front eaves
-    # Left eave drip groove (X = -8.5 .. -5.3, Y = -3.0 .. 84.3)
     add_box_feature(
         comp, LID_LEFT_X0 + DRIP_LIP_W, LID_BACK_Y0, LID_SKIRT_Z0 - 0.5,
         DRIP_GROOVE_W, LID_DEPTH_Y - DRIP_LIP_W, DRIP_GROOVE_DEPTH_Z + 0.5,
         adsk.fusion.FeatureOperations.CutFeatureOperation, lid,
     )
-    # Right eave drip groove (X = 214.3 .. 217.5, Y = -3.0 .. 84.3)
     add_box_feature(
         comp, LID_RIGHT_X1 - DRIP_LIP_W - DRIP_GROOVE_W, LID_BACK_Y0, LID_SKIRT_Z0 - 0.5,
         DRIP_GROOVE_W, LID_DEPTH_Y - DRIP_LIP_W, DRIP_GROOVE_DEPTH_Z + 0.5,
         adsk.fusion.FeatureOperations.CutFeatureOperation, lid,
     )
-    # Front eave drip groove (X = -8.5 .. 217.5, Y = 84.3 .. 87.5)
     add_box_feature(
         comp, LID_LEFT_X0 + DRIP_LIP_W, LID_FRONT_Y1 - DRIP_LIP_W - DRIP_GROOVE_W, LID_SKIRT_Z0 - 0.5,
         LID_WIDTH_X - 2.0 * DRIP_LIP_W, DRIP_GROOVE_W, DRIP_GROOVE_DEPTH_Z + 0.5,
         adsk.fusion.FeatureOperations.CutFeatureOperation, lid,
     )
 
-    # 5. Cut 2x M4 side locking screw holes + button-head counterbores at Z = 145.0, Y = 38.5
     cut_cylinders_on_plane(
         comp, lid, "x", LID_LEFT_X0 - 0.5, LID_OVERHANG_SIDE_X + 2.0,
         [(LID_LEFT_X0, LID_M4_Y, LID_M4_Z, M4_CLEAR_DIA / 2.0)],
@@ -717,73 +730,13 @@ def build_overhang_lid_component(
     return comp
 
 
-def build_wire_gland_cap_component(
-    app: adsk.core.Application,
-    design: adsk.fusion.Design,
-    root: adsk.fusion.Component,
-) -> adsk.fusion.Component:
-    """03_10AWG_Wire_Gland_Cap: Bolt-on compression gland cap for the two 10 AWG actuator wires."""
-    comp = create_subcomponent(root, "03_10AWG_Wire_Gland_Cap")
-    cap_x0 = BOX_WIDTH_X + GLAND_BOSS_DX + 0.5  # 218.5 mm
-
-    cap = add_box_feature(
-        comp,
-        cap_x0,
-        GLAND_CENTER_Y - GLAND_BOSS_W_Y / 2.0,
-        GLAND_CENTER_Z - GLAND_BOSS_H_Z / 2.0,
-        GLAND_CAP_DX,
-        GLAND_BOSS_W_Y,
-        GLAND_BOSS_H_Z,
-        body_name="print_wire_gland_cap",
-    )
-
-    # Inner compression tongue projecting 1.5 mm into the boss's seal pocket
-    add_box_feature(
-        comp,
-        cap_x0 - 1.5,
-        GLAND_CENTER_Y - 9.5,
-        GLAND_CENTER_Z - 3.6,
-        1.5,
-        19.0,
-        7.2,
-        adsk.fusion.FeatureOperations.JoinFeatureOperation,
-        cap,
-    )
-
-    # Cut 2x 5.2 mm 10 AWG wire passages + 2x M4 screw holes
-    wy1 = GLAND_CENTER_Y - GLAND_WIRE_SPAN_Y / 2.0
-    wy2 = GLAND_CENTER_Y + GLAND_WIRE_SPAN_Y / 2.0
-    by1 = GLAND_CENTER_Y - GLAND_BOLT_SPAN_Y / 2.0
-    by2 = GLAND_CENTER_Y + GLAND_BOLT_SPAN_Y / 2.0
-
-    cut_cylinders_on_plane(
-        comp, cap, "x", cap_x0 - 2.0, GLAND_CAP_DX + 4.0,
-        [
-            (cap_x0, wy1, GLAND_CENTER_Z, WIRE_BORE_DIA / 2.0),
-            (cap_x0, wy2, GLAND_CENTER_Z, WIRE_BORE_DIA / 2.0),
-            (cap_x0, by1, GLAND_CENTER_Z, M4_CLEAR_DIA / 2.0),
-            (cap_x0, by2, GLAND_CENTER_Z, M4_CLEAR_DIA / 2.0),
-        ],
-    )
-    cut_cylinders_on_plane(
-        comp, cap, "x", cap_x0 + GLAND_CAP_DX - 3.0, 4.0,
-        [
-            (cap_x0, by1, GLAND_CENTER_Z, M4_CBORE_DIA / 2.0),
-            (cap_x0, by2, GLAND_CENTER_Z, M4_CBORE_DIA / 2.0),
-        ],
-    )
-
-    apply_color(app, design, cap, *COL_PRINT_ORANGE)
-    return comp
-
-
 def build_battery_and_wiring_component(
     app: adsk.core.Application,
     design: adsk.fusion.Design,
     root: adsk.fusion.Component,
 ) -> adsk.fusion.Component:
-    """04_MightyMax_12V_10Ah_And_Wiring: Mighty Max ML10-12 battery + F2 spade terminals + 2x 10 AWG actuator wires."""
-    comp = create_subcomponent(root, "04_MightyMax_12V_10Ah_And_Wiring")
+    """03_MightyMax_12V_10Ah_And_Wiring: Mighty Max ML10-12 battery + F2 spade terminals + 2x 10 AWG actuator wires."""
+    comp = create_subcomponent(root, "03_MightyMax_12V_10Ah_And_Wiring")
 
     bx0 = WALL_T + BATT_CLEAR_XY  # 6.0 mm
     by0 = WALL_T + BATT_CLEAR_XY  # 6.0 mm
@@ -794,7 +747,6 @@ def build_battery_and_wiring_component(
     fillet_parallel_edges(comp, batt, "z", 2.5)
     apply_color(app, design, batt, *COL_BATT_CHARCOAL)
 
-    # F2 Spade Terminals (+12V Red at Y = 57.0, -12V Black at Y = 20.0, X = 143.0, Z = 119.0 .. 127.0)
     term_x = bx0 + BATT_LEN_X - 14.0  # 143.0 mm
     pos_y = by0 + BATT_WID_Y - 14.0   # 57.0 mm
     neg_y = by0 + 14.0                # 20.0 mm
@@ -820,17 +772,16 @@ def build_battery_and_wiring_component(
     )
     apply_color(app, design, neg_t, *COL_TERM_BLACK)
 
-    # Two 10 AWG Actuator Wires (+12V Red and GND Black) routing through the wire bay & exiting the side gland
-    wy_pos = GLAND_CENTER_Y + GLAND_WIRE_SPAN_Y / 2.0  # 50.0 mm
-    wy_neg = GLAND_CENTER_Y - GLAND_WIRE_SPAN_Y / 2.0  # 38.0 mm
+    wy_pos = WIRE_EXIT_CENTER_Y + WIRE_EXIT_SPAN_Y / 2.0  # 51.0 mm
+    wy_neg = WIRE_EXIT_CENTER_Y - WIRE_EXIT_SPAN_Y / 2.0  # 37.0 mm
     r_wire = WIRE_10AWG_OD / 2.0
 
     w_pos = add_cylinder_feature(
-        comp, "x", 185.0, 70.0, 185.0, wy_pos, GLAND_CENTER_Z, r_wire,
+        comp, "x", 185.0, 55.0, 185.0, wy_pos, WIRE_EXIT_CENTER_Z, r_wire,
         body_name="wire_10awg_pos_red",
     )
     add_cylinder_feature(
-        comp, "z", GLAND_CENTER_Z, 100.0, 185.0, wy_pos, GLAND_CENTER_Z, r_wire,
+        comp, "z", WIRE_EXIT_CENTER_Z, 100.0, 185.0, wy_pos, WIRE_EXIT_CENTER_Z, r_wire,
         adsk.fusion.FeatureOperations.JoinFeatureOperation, w_pos,
     )
     add_cylinder_feature(
@@ -840,11 +791,11 @@ def build_battery_and_wiring_component(
     apply_color(app, design, w_pos, *COL_TERM_RED)
 
     w_neg = add_cylinder_feature(
-        comp, "x", 174.0, 81.0, 174.0, wy_neg, GLAND_CENTER_Z, r_wire,
+        comp, "x", 174.0, 66.0, 174.0, wy_neg, WIRE_EXIT_CENTER_Z, r_wire,
         body_name="wire_10awg_neg_black",
     )
     add_cylinder_feature(
-        comp, "z", GLAND_CENTER_Z, 106.0, 174.0, wy_neg, GLAND_CENTER_Z, r_wire,
+        comp, "z", WIRE_EXIT_CENTER_Z, 106.0, 174.0, wy_neg, WIRE_EXIT_CENTER_Z, r_wire,
         adsk.fusion.FeatureOperations.JoinFeatureOperation, w_neg,
     )
     add_cylinder_feature(
@@ -877,17 +828,14 @@ def run(context: dict) -> None:
             design = adsk.fusion.Design.cast(app.activeProduct)
         design.designType = adsk.fusion.DesignTypes.ParametricDesignType
 
-        # Set document display units to millimeters
         design.fusionUnitsManager.distanceDisplayUnits = adsk.fusion.DistanceUnits.MillimeterDistanceUnits
         register_user_parameters(design)
 
         root = design.rootComponent
 
-        # Build the 5 structured sub-components
         build_planter_wall_component(app, design, root)
         build_battery_box_component(app, design, root)
         build_overhang_lid_component(app, design, root)
-        build_wire_gland_cap_component(app, design, root)
         build_battery_and_wiring_component(app, design, root)
 
         vp = app.activeViewport
@@ -897,11 +845,10 @@ def run(context: dict) -> None:
         ui.messageBox(
             "Aggie Cold Box 12V 10Ah Battery Enclosure generated successfully!\n\n"
             f"• Battery Bay: {BATT_BAY_W_X:.0f} × {INNER_DEPTH_Y:.0f} mm (Mighty Max ML10-12: 151 × 65 × 119 mm)\n"
-            f"• Wire-Stuffing Bay: {WIRE_BAY_W_X:.0f} × {INNER_DEPTH_Y:.0f} × 157 mm side bay + {OVERHEAD_WIRE_H_Z:.0f} mm overhead clearance\n"
-            f"• Overhang Drip Lid: 8° snow-shedding roof, +{LID_OVERHANG_SIDE_X:.0f} mm side / +{LID_OVERHANG_FRONT_Y:.0f} mm front eaves,\n"
-            "  24 mm skirt with undercut drip groove + 10 mm raised inner labyrinth splash lip\n"
-            "• Actuator Wire Gland: Split 2× 10 AWG (Ø5.2 mm) compression boss + 45° snow/rain hood\n"
-            "• Planter Mounting: 4× #10 wood-screw flanges (upper keyholes + lower counterbores) + 3 mm rear drainage standoffs",
+            f"• Under-Battery Support: 5× {UNDER_GUSSET_T_X:.0f} mm thick triangular gussets extending {UNDER_GUSSET_H_Z:.0f} mm below floor\n"
+            f"• Lower Mounting Holes: Extended down to Z = {SCREW_LOWER_Z:.0f} mm below battery floor (4× lower + 2× upper keyholes)\n"
+            f"• Wire-Stuffing Bay: {WIRE_BAY_W_X:.0f} × {INNER_DEPTH_Y:.0f} × 155 mm side bay + {OVERHEAD_WIRE_H_Z:.0f} mm overhead clearance\n"
+            f"• Wire Exit: Clean 2× Ø{WIRE_HOLE_DIA:.1f} mm through-holes out right wall (no external gland boss/roof)",
             "Aggie Cold Box Battery Enclosure Complete",
         )
 
