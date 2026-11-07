@@ -5,26 +5,29 @@ Holds one Mighty Max 12V 10Ah SLA battery (ML10-12: 151 x 65 x 111 mm case,
 Backyard Discovery Aggie Cold Box planter, driving two 200 mm 12V linear actuators
 via a toggle switch.
 
-Key features:
+Optimized for 100% support-free 3D printing on the Bambu Lab H2D (350 x 320 x 325 mm):
   1. Weatherproof Overhang Lid (print_overhang_lid):
      - 8-deg sloped shed roof so snow and water slide forward off the front eave
+     - Inner ceiling is parallel to the 8-deg outer roof (6.0 mm uniform slab) so when
+       flipped onto the H2D build plate, both the bed contact face (z = 0) and inner
+       ceiling (z = 6.0 mm) print 100% flat with zero bridging or stair-stepping!
      - 12.0 mm side eaves and 14.0 mm front eave overhang
-     - 24.0 mm deep outer skirt with a 3.5 x 3.0 mm undercut perimeter drip groove
-     - 10.0 mm raised inner labyrinth splash lip on the box rim
+     - 22.0 mm deep outer skirt with a 3.2 x 3.0 mm undercut perimeter drip groove
+     - 8.0 mm raised inner labyrinth splash lip on the box rim
      - 2x M4 side locking screws into brass heat-set inserts (zero top-roof holes)
   2. Dedicated Excess Wire & Fuse Stuffing Bay:
-     - 42.0 x 67.0 x 157.0 mm side wiring compartment beside the battery cradle
-     - 35.0 mm overhead wiring clearance above the F2 battery terminals
+     - 42.0 x 67.0 x 155.0 mm side wiring compartment beside the battery cradle
+     - 33.0 mm overhead wiring clearance above the F2 battery terminals
      - 40.0 mm tall battery cradle divider wall (locks battery in place, open above)
-     - 2x internal zip-tie anchor bridges on the back wall + 1x behind the wire gland
+     - 2x internal 45-deg chamfered zip-tie anchor bridges on the back wall
   3. 2x 10 AWG Split Compression Wire Gland + 45-deg Snow/Rain Hood:
      - Positioned on the lower right side of the wiring bay for natural drip loop
-     - Twin 5.2 mm semi-circular clamping channels for two insulated 10 AWG wires
+     - Twin 5.2 mm clamping channels for two insulated 10 AWG wires
      - Bolt-on compression cap (print_wire_gland_cap) via 2x M4 heat-set inserts
-     - Overhanging 45-deg upper rain/snow shield
+     - Overhanging 45-deg upper rain/snow shield with 45-deg support-free lower bevel
   4. Aggie Cold Box Cedar Back-Wall Mounting:
-     - Left & right gusseted mounting flanges (8.0 mm thick) with 4x #10 wood screw
-       holes (upper drop-on keyholes + lower counterbored holes)
+     - Left & right gusseted mounting flanges (8.0 mm thick, 45-deg support-free gussets)
+       with 4x #10 wood screw holes (upper drop-on keyholes + lower counterbored holes)
      - 4x 3.0 mm rear ventilation/drainage standoff ribs so water runs freely behind
      - 3x 3.0 mm internal floor ribs + 2x 4.0 mm floor condensation weep holes
 """
@@ -48,6 +51,9 @@ STL_DIR = os.path.join(ROOT, "stl")
 VIEWER_DIR = os.path.join(ROOT, "viewer")
 RENDERS_DIR = os.path.join(ROOT, "renders")
 
+# Bambu Lab H2D Build Volume (mm)
+BED_H2D: tuple[float, float, float] = (350.0, 320.0, 325.0)
+
 # ==============================================================================
 # 1. PARAMETRIC DIMENSIONS (ALL VALUES IN MILLIMETERS)
 # ==============================================================================
@@ -70,14 +76,14 @@ DIVIDER_T_X: float = 4.0            # 4.0 mm battery cradle divider rib (X = 158
 DIVIDER_H_Z: float = 40.0           # 40.0 mm tall above floor (Z = 5.0 .. 45.0)
 WIRE_BAY_W_X: float = 42.0          # 42.0 mm dedicated excess wire & fuse bay (X = 162.0 .. 204.0)
 INNER_DEPTH_Y: float = BATT_WID_Y + 2.0 * BATT_CLEAR_XY  # 67.0 mm (Y = 5.0 .. 72.0)
-OVERHEAD_WIRE_H_Z: float = 35.0     # 35.0 mm clear headroom above F2 terminals (Z = 127.0 .. 162.0)
+OVERHEAD_WIRE_H_Z: float = 33.0     # 33.0 mm clear headroom above F2 terminals (Z = 127.0 .. 160.0)
 
 BOX_WIDTH_X: float = WALL_T + BATT_BAY_W_X + DIVIDER_T_X + WIRE_BAY_W_X + WALL_T  # 209.0 mm
 BOX_DEPTH_Y: float = WALL_T + INNER_DEPTH_Y + WALL_T                              # 77.0 mm
 BOX_SHOULDER_Z: float = 152.0       # Outer wall shoulder height where lid collar seats
-SPLASH_LIP_H_Z: float = 10.0        # 10.0 mm tall raised inner labyrinth splash lip
+SPLASH_LIP_H_Z: float = 8.0         # 8.0 mm tall raised inner labyrinth splash lip (Z = 152.0 .. 160.0)
 SPLASH_LIP_STEP: float = 2.2        # 2.2 mm outer step-in (lip thickness = 2.8 mm)
-BOX_TOTAL_H_Z: float = BOX_SHOULDER_Z + SPLASH_LIP_H_Z                            # 162.0 mm
+BOX_TOTAL_H_Z: float = BOX_SHOULDER_Z + SPLASH_LIP_H_Z                            # 160.0 mm
 
 # Rear Planter-Wall Drainage Standoffs & Side Mounting Flanges
 STANDOFF_DEPTH_Y: float = 3.0       # 3.0 mm drainage/airflow gap behind box (Y = -3.0 .. 0.0)
@@ -100,7 +106,7 @@ M4_INSERT_DEPTH: float = 9.0        # Blind bore depth for M4 insert
 LID_M4_Z: float = 145.0             # Side M4 lid locking screw elevation
 LID_M4_Y: float = 38.5              # Centered on box depth (77.0 / 2)
 
-# 2x 10 AWG Split Compression Wire Gland & 45-deg Snow/Rain Drip Hood (Right Wall)
+# 2x 10 AWG Split Compression Wire Gland & 45-deg Support-Free Snow/Rain Hood (Right Wall)
 WIRE_10AWG_OD: float = 5.0          # Insulated 10 AWG wire jacket OD
 WIRE_BORE_DIA: float = 5.2          # Clamping channel diameter for 10 AWG wire
 GLAND_CENTER_Y: float = 44.0        # Forward of right mounting flange gussets
@@ -113,7 +119,7 @@ GLAND_BOSS_DX: float = 9.0          # Boss projects +9.0 mm from X = 209.0 to X 
 GLAND_CAP_DX: float = 7.0           # Bolt-on cap thickness (X = 218.5 .. 225.5 mm)
 GLAND_HOOD_DX: float = 16.0         # Upper rain hood projects to X = 225.0 mm (covers boss + cap)
 
-# Weatherproof Overhang Lid (Sloped Shed Roof + Eaves + Undercut Drip Groove)
+# Weatherproof Overhang Lid (Sloped Shed Roof + Parallel Ceiling + Eaves + Undercut Drip Groove)
 LID_OVERHANG_SIDE_X: float = 12.0   # 12.0 mm overhang left (X = -12.0) and right (X = 221.0)
 LID_OVERHANG_FRONT_Y: float = 14.0  # 14.0 mm overhang front (Y = 91.0)
 LID_BACK_Y0: float = -STANDOFF_DEPTH_Y  # -3.0 mm (flush against cedar planter wall)
@@ -123,10 +129,10 @@ LID_RIGHT_X1: float = BOX_WIDTH_X + LID_OVERHANG_SIDE_X   # 221.0 mm
 LID_WIDTH_X: float = LID_RIGHT_X1 - LID_LEFT_X0           # 233.0 mm
 LID_DEPTH_Y: float = LID_FRONT_Y1 - LID_BACK_Y0           # 94.0 mm
 
-LID_SKIRT_Z0: float = 138.0         # Bottom of outer drip skirt (24 mm below Z = 162 rim)
+LID_SKIRT_Z0: float = 138.0         # Bottom of outer drip skirt (22 mm below Z = 160 rim)
 LID_ROOF_FRONT_Z: float = 167.0     # Top of roof at front eave (Y = 91.0 mm)
-LID_ROOF_BACK_Z: float = 180.0      # Top of roof at back wall (Y = -3.0 mm -> 8-deg shed slope!)
-LID_CEIL_Z: float = 163.0           # Inner flat ceiling (1.0 mm above Z = 162 splash lip)
+LID_ROOF_BACK_Z: float = 180.0      # Top of roof at back wall (Y = -3.0 mm -> 7.88-deg shed slope!)
+LID_ROOF_SLAB_T: float = 6.0        # 6.0 mm uniform sloped roof slab (parallel inner ceiling for flat H2D printing!)
 LID_COLLAR_CLEAR: float = 0.6       # 0.6 mm per-side slip fit around box walls
 DRIP_LIP_W: float = 3.5             # Outer drip bead width
 DRIP_GROOVE_W: float = 3.2          # Undercut drip channel width
@@ -139,7 +145,7 @@ DRIP_GROOVE_DEPTH_Z: float = 3.0    # Undercut drip channel height (Z = 138.0 ..
 
 def build_battery_box() -> cq.Workplane:
     """Build the 1-piece support-free 3D-printed Battery Box enclosure (print_battery_box)."""
-    # 1. Main outer box shell (X: 0..209, Y: 0..77, Z: 0..162)
+    # 1. Main outer box shell (X: 0..209, Y: 0..77, Z: 0..160)
     box = (
         cq.Workplane("XY")
         .workplane(offset=0.0)
@@ -148,8 +154,7 @@ def build_battery_box() -> cq.Workplane:
         .extrude(BOX_TOTAL_H_Z)
     )
 
-    # 2. Step inward around top outer perimeter (Z: 152..162) on Left, Right, Front to form inner labyrinth splash lip
-    # Keep full 5.0 mm back wall at Y = 0..5, step Left (X: 0..2.2), Right (X: 206.8..209), Front (Y: 74.8..77)
+    # 2. Step inward around top outer perimeter (Z: 152..160) on Left, Right, Front to form inner labyrinth splash lip
     outer_top = (
         cq.Workplane("XY")
         .workplane(offset=BOX_SHOULDER_Z)
@@ -166,7 +171,7 @@ def build_battery_box() -> cq.Workplane:
     )
     box = box.cut(outer_top.cut(inner_keep))
 
-    # 3. Cut main interior cavity (X: 5..204, Y: 5..72, Z: 5..162)
+    # 3. Cut main interior cavity (X: 5..204, Y: 5..72, Z: 5..160)
     cavity = (
         cq.Workplane("XY")
         .workplane(offset=FLOOR_T)
@@ -205,21 +210,27 @@ def build_battery_box() -> cq.Workplane:
         )
         box = box.union(rib)
 
-    # 6. Internal Zip-Tie Anchor Bridges on Back Wall of Wiring Bay (X: 176..190, Y: 5..11, Z: 65 & 110)
+    # 6. Internal 45-deg Support-Free Zip-Tie Anchor Bridges on Back Wall of Wiring Bay (X: 176..190, Z: 65 & 110)
     for tz in (65.0, 110.0):
+        b_pts = [
+            (WALL_T, tz - 12.0),
+            (WALL_T + 6.0, tz - 6.0),
+            (WALL_T + 6.0, tz + 6.0),
+            (WALL_T, tz + 12.0),
+        ]
         bridge = (
-            cq.Workplane("XY")
-            .workplane(offset=tz - 6.0)
-            .moveTo(183.0, WALL_T + 3.0)
-            .rect(14.0, 6.0)
-            .extrude(12.0)
+            cq.Workplane("YZ")
+            .workplane(offset=176.0)
+            .polyline(b_pts)
+            .close()
+            .extrude(14.0)
         )
         slot = (
             cq.Workplane("XY")
-            .workplane(offset=tz - 7.0)
+            .workplane(offset=tz - 13.0)
             .moveTo(183.0, WALL_T + 2.0)
             .rect(6.0, 4.0)
-            .extrude(14.0)
+            .extrude(26.0)
         )
         box = box.union(bridge.cut(slot))
 
@@ -245,16 +256,29 @@ def build_battery_box() -> cq.Workplane:
         )
         box = box.union(flange)
 
-        # 2x Horizontal triangular/rectangular structural gussets per flange (Z: 0..6 and Z: 62..68, Y: 5..17)
-        for gz in (0.0, 62.0):
-            gusset = (
-                cq.Workplane("XY")
-                .workplane(offset=gz)
-                .moveTo(wall_x + side_sign * 6.0, WALL_T + 6.0)
-                .rect(12.0, 12.0)
-                .extrude(6.0)
-            )
-            box = box.union(gusset)
+        # Bottom gusset (sits flat on Z = 0..6 print bed) + Mid gusset with 45-deg support-free lower bevel (Z = 50..68)
+        gx0 = wall_x - 12.0 if side_sign < 0 else wall_x
+        bot_gusset = (
+            cq.Workplane("XY")
+            .workplane(offset=0.0)
+            .moveTo(gx0 + 6.0, WALL_T + 6.0)
+            .rect(12.0, 12.0)
+            .extrude(6.0)
+        )
+        mid_g_pts = [
+            (WALL_T, 50.0),
+            (WALL_T + 12.0, 62.0),
+            (WALL_T + 12.0, 68.0),
+            (WALL_T, 68.0),
+        ]
+        mid_gusset = (
+            cq.Workplane("YZ")
+            .workplane(offset=gx0)
+            .polyline(mid_g_pts)
+            .close()
+            .extrude(12.0)
+        )
+        box = box.union(bot_gusset).union(mid_gusset)
 
         # Lower #10 wood-screw through-hole + front counterbore at Z = 28.0 mm
         # Note: cq.Workplane("XZ") has normal -Y, so world Y = y0 uses offset = -y0 and +Y extrusion uses -dy
@@ -313,41 +337,28 @@ def build_battery_box() -> cq.Workplane:
         )
         box = box.cut(kh_shaft).cut(kh_slot).cut(kh_entry).cut(kh_recess).cut(kh_top_cbore)
 
-    # 9. Right-Side 2x 10 AWG Wire Gland Boss + 45-deg Support-Free Chamfer + 45-deg Upper Rain Hood
-    # Profile in XZ plane extruded along +Y (Y = 24.0 .. 64.0 mm for boss, Y = 20.0 .. 68.0 mm for rain hood)
+    # 9. Right-Side 2x 10 AWG Wire Gland Boss + 45-deg Support-Free Lower Chamfer & 45-deg Upper Rain Hood
+    # Combined 100% support-free XZ profile extruded along +Y (Y = 24.0 .. 64.0 mm):
+    #   Starts at (X = 209, Z = 6) -> 45-deg out to (X = 218, Z = 15) -> vertical boss face to (X = 218, Z = 37)
+    #   -> 45-deg rain-hood underside out to (X = 225, Z = 44) -> vertical drip lip to (X = 225, Z = 47)
+    #   -> 45-deg snow-shedding roof back to wall at (X = 209, Z = 63)!
     y_boss0 = GLAND_CENTER_Y - GLAND_BOSS_W_Y / 2.0  # 24.0 mm
-    boss_pts = [
+    boss_and_hood_pts = [
         (BOX_WIDTH_X, 6.0),
         (BOX_WIDTH_X + GLAND_BOSS_DX, 15.0),
         (BOX_WIDTH_X + GLAND_BOSS_DX, 37.0),
-        (BOX_WIDTH_X, 37.0),
+        (BOX_WIDTH_X + GLAND_HOOD_DX, 44.0),
+        (BOX_WIDTH_X + GLAND_HOOD_DX, 47.0),
+        (BOX_WIDTH_X, 63.0),
     ]
     gland_boss = (
         cq.Workplane("XZ")
         .workplane(offset=-y_boss0)
-        .polyline(boss_pts)
+        .polyline(boss_and_hood_pts)
         .close()
         .extrude(-GLAND_BOSS_W_Y)
     )
     box = box.union(gland_boss)
-
-    # Overhanging 45-deg Snow & Rain Drip Hood directly above the gland (Z = 37.0 .. 55.0 mm, Y = 20.0 .. 68.0 mm)
-    hood_w_y = GLAND_BOSS_W_Y + 8.0  # 48.0 mm
-    y_hood0 = GLAND_CENTER_Y - hood_w_y / 2.0  # 20.0 mm
-    hood_pts = [
-        (BOX_WIDTH_X, 37.0),
-        (BOX_WIDTH_X + GLAND_HOOD_DX, 37.0),
-        (BOX_WIDTH_X + GLAND_HOOD_DX, 41.0),
-        (BOX_WIDTH_X, 55.0),
-    ]
-    rain_hood = (
-        cq.Workplane("XZ")
-        .workplane(offset=-y_hood0)
-        .polyline(hood_pts)
-        .close()
-        .extrude(-hood_w_y)
-    )
-    box = box.union(rain_hood)
 
     # Cut 2x 10 AWG wire channels (dia 5.2 mm) through right wall + boss at Y = 38.0 and Y = 50.0, Z = 26.0
     for wy in (GLAND_CENTER_Y - GLAND_WIRE_SPAN_Y / 2.0, GLAND_CENTER_Y + GLAND_WIRE_SPAN_Y / 2.0):
@@ -370,7 +381,7 @@ def build_battery_box() -> cq.Workplane:
     )
     box = box.cut(seal_pocket)
 
-    # Cut 2x M4 heat-set insert bores in gland boss face (X = 218.0 inward 9.5 mm) at Y = 29.0 & 59.0, Z = 26.0
+    # Cut 2x M4 heat-set insert bores in gland boss face (X = 218.0 inward 9.0 mm) at Y = 29.0 & 59.0, Z = 26.0
     for by in (GLAND_CENTER_Y - GLAND_BOLT_SPAN_Y / 2.0, GLAND_CENTER_Y + GLAND_BOLT_SPAN_Y / 2.0):
         ins_bore = (
             cq.Workplane("YZ")
@@ -412,11 +423,15 @@ def build_battery_box() -> cq.Workplane:
     return box
 
 
+def roof_z_at_y(y_mm: float) -> float:
+    """Return outer roof elevation Z at depth Y along the 7.88-deg forward shed slope."""
+    t = (y_mm - LID_BACK_Y0) / LID_DEPTH_Y
+    return LID_ROOF_BACK_Z + t * (LID_ROOF_FRONT_Z - LID_ROOF_BACK_Z)
+
+
 def build_overhang_lid() -> cq.Workplane:
-    """Build the sloped weatherproof Overhang Lid with snow-shedding pitch, deep skirt & undercut drip groove."""
+    """Build the sloped weatherproof Overhang Lid with parallel inner ceiling for flat support-free H2D printing."""
     # 1. Outer sloped roof + skirt block extruded along X (X = -12.0 .. 221.0 mm)
-    # Profile in YZ plane:
-    #   (Y = -3.0, Z = 138.0) -> (Y = 91.0, Z = 138.0) -> (Y = 91.0, Z = 167.0) -> (Y = -3.0, Z = 180.0)
     lid_pts = [
         (LID_BACK_Y0, LID_SKIRT_Z0),
         (LID_FRONT_Y1, LID_SKIRT_Z0),
@@ -432,8 +447,6 @@ def build_overhang_lid() -> cq.Workplane:
     )
 
     # 2. Cut lower inner collar cavity around main box outer walls (Z = 138.0 .. 152.6 mm)
-    # Box outer walls span X: 0..209, Y: 0..77 -> add 0.6 mm clearance per side:
-    # X: -0.6 .. 209.6 (width = 210.2), Y: -0.6 .. 77.6 (depth = 78.2)
     low_w_x = BOX_WIDTH_X + 2.0 * LID_COLLAR_CLEAR
     low_d_y = BOX_DEPTH_Y + 2.0 * LID_COLLAR_CLEAR
     low_yc = -LID_COLLAR_CLEAR + low_d_y / 2.0
@@ -446,24 +459,29 @@ def build_overhang_lid() -> cq.Workplane:
     )
     lid = lid.cut(lower_cav)
 
-    # 3. Cut upper inner labyrinth cavity around the raised splash lip (Z = 152.6 .. 163.0 mm)
-    # Splash lip outer faces span X: 2.2 .. 206.8, Y: 0.0 .. 74.8 -> add 0.6 mm clearance:
-    # X: 1.6 .. 207.4 (width = 205.8), Y: -0.6 .. 75.4 (depth = 76.0)
+    # 3. Cut upper inner labyrinth cavity around the raised splash lip with ceiling PARALLEL to the 8-deg sloped roof!
+    #    X spans 1.6 .. 207.4 mm (width = 205.8 mm), Y spans -0.6 .. 75.4 mm.
+    #    Ceiling is exactly LID_ROOF_SLAB_T (6.0 mm) below the sloped outer roof face so it prints flat on the H2D bed!
+    up_x0 = SPLASH_LIP_STEP - LID_COLLAR_CLEAR
     up_w_x = (BOX_WIDTH_X - 2.0 * SPLASH_LIP_STEP) + 2.0 * LID_COLLAR_CLEAR
-    up_d_y = (BOX_DEPTH_Y - SPLASH_LIP_STEP) + 2.0 * LID_COLLAR_CLEAR
-    up_yc = -LID_COLLAR_CLEAR + up_d_y / 2.0
+    up_y0 = -LID_COLLAR_CLEAR
+    up_y1 = BOX_DEPTH_Y - SPLASH_LIP_STEP + LID_COLLAR_CLEAR
+    ceil_pts = [
+        (up_y0, BOX_SHOULDER_Z + 0.5),
+        (up_y1, BOX_SHOULDER_Z + 0.5),
+        (up_y1, roof_z_at_y(up_y1) - LID_ROOF_SLAB_T),
+        (up_y0, roof_z_at_y(up_y0) - LID_ROOF_SLAB_T),
+    ]
     upper_cav = (
-        cq.Workplane("XY")
-        .workplane(offset=BOX_SHOULDER_Z + 0.5)
-        .moveTo(BOX_WIDTH_X / 2.0, up_yc)
-        .rect(up_w_x, up_d_y)
-        .extrude(LID_CEIL_Z - (BOX_SHOULDER_Z + 0.5))
+        cq.Workplane("YZ")
+        .workplane(offset=up_x0)
+        .polyline(ceil_pts)
+        .close()
+        .extrude(up_w_x)
     )
     lid = lid.cut(upper_cav)
 
     # 4. Cut the Undercut Perimeter Drip Channel (Z = 138.0 .. 141.0 mm) inside the outer 3.5 mm eave bead
-    # Outer skirt stays down to Z = 138.0 mm at the 3.5 mm perimeter rim (forming a projecting drip lip);
-    # the 3.2 mm wide channel inside it is recessed up to Z = 141.0 mm so water drips cleanly off the outer bead!
     drip_outer_w = LID_WIDTH_X - 2.0 * DRIP_LIP_W
     drip_outer_d = LID_DEPTH_Y - DRIP_LIP_W
     drip_outer_yc = LID_BACK_Y0 + drip_outer_d / 2.0
@@ -580,7 +598,6 @@ def build_mightymax_battery() -> tuple[cq.Workplane, cq.Workplane, cq.Workplane]
     bxc = bx0 + BATT_LEN_X / 2.0  # 81.5 mm
     byc = by0 + BATT_WID_Y / 2.0  # 38.5 mm
 
-    # Main SLA case body (151 x 65 x 105 mm) + slightly overhanging top cover lid (6 mm tall = 111 mm total case)
     case = (
         cq.Workplane("XY")
         .workplane(offset=BATT_Z0)
@@ -591,8 +608,6 @@ def build_mightymax_battery() -> tuple[cq.Workplane, cq.Workplane, cq.Workplane]
         .fillet(2.5)
     )
 
-    # F2 Spade Terminals (+12V Red at front-right X=145, Y=56; -12V Black at back-right X=145, Y=21)
-    # Placed on the right end next to the wiring bay for shortest, cleanest wire routing!
     term_x = bx0 + BATT_LEN_X - 14.0  # 143.0 mm
     pos_y = by0 + BATT_WID_Y - 14.0   # 57.0 mm (+12V Red)
     neg_y = by0 + 14.0                # 20.0 mm (-12V Black)
@@ -631,8 +646,6 @@ def build_mightymax_battery() -> tuple[cq.Workplane, cq.Workplane, cq.Workplane]
 
 def build_actuator_wires() -> tuple[cq.Workplane, cq.Workplane]:
     """Build the two 10 AWG actuator power leads (+12V Red and GND Black) routing through the wire bay & gland."""
-    # Wire 1 (+12V Red): exits gland hole at Y = 50.0, Z = 26.0, X = 186.0 .. 255.0 mm
-    # plus vertical riser inside wire bay from Z = 26.0 .. 125.0 mm and horizontal bridge to positive F2 terminal
     wy_pos = GLAND_CENTER_Y + GLAND_WIRE_SPAN_Y / 2.0  # 50.0 mm
     wy_neg = GLAND_CENTER_Y - GLAND_WIRE_SPAN_Y / 2.0  # 38.0 mm
 
@@ -688,8 +701,7 @@ def build_planter_wall_reference() -> cq.Workplane:
     plank_w_x = 300.0
     plank_xc = BOX_WIDTH_X / 2.0
     wall = None
-    # 3 horizontal cedar boards with 1.5 mm V-grooves
-    for idx, (z0, h) in enumerate(((-20.0, 72.0), (53.5, 72.0), (127.0, 72.0))):
+    for z0, h in ((-20.0, 72.0), (53.5, 72.0), (127.0, 72.0)):
         board = (
             cq.Workplane("XY")
             .workplane(offset=z0)
@@ -726,7 +738,7 @@ def build_assembly() -> cq.Assembly:
 
 
 # ==============================================================================
-# 3. CLASH CHECKER, PRINT-BED ORIENTATION & EXPORTERS
+# 3. CLASH CHECKER, H2D PRINT-BED ORIENTATION & EXPORTERS
 # ==============================================================================
 
 def run_clash_checks(asm: cq.Assembly) -> int:
@@ -737,7 +749,6 @@ def run_clash_checks(asm: cq.Assembly) -> int:
     for i in range(len(children)):
         for j in range(i + 1, len(children)):
             c1, c2 = children[i], children[j]
-            # Terminals & wires connect intentionally at terminal posts
             if {c1.name, c2.name} & {"terminal_pos_f2", "terminal_neg_f2"} and {c1.name, c2.name} & {
                 "battery_mightymax_12v10ah",
                 "wire_10awg_pos",
@@ -757,23 +768,24 @@ def run_clash_checks(asm: cq.Assembly) -> int:
 
 
 def orient_for_printing(name: str, wp: cq.Workplane) -> cq.Workplane:
-    """Orient each 3D-printed part flat on Z = 0 for 100% support-free FDM printing."""
+    """Orient each 3D-printed part flat on Z = 0 at origin (0,0,0) for support-free H2D printing."""
     solid = wp.val()
     if name == "print_overhang_lid":
-        # Rotate lid so its sloped outer shed-roof face lies 100% flat on the Z = 0 print bed!
+        # Rotate lid by 180 + 7.88 deg around X so its sloped outer shed-roof face AND parallel inner ceiling
+        # lie 100% flat on the Z = 0 H2D build plate!
         slope_deg = math.degrees(math.atan2(LID_ROOF_BACK_Z - LID_ROOF_FRONT_Z, LID_DEPTH_Y))
         rotated = solid.rotate((0, 0, 0), (1, 0, 0), 180.0 + slope_deg)
         bb = rotated.BoundingBox()
         moved = rotated.translate((-bb.xmin, -bb.ymin, -bb.zmin))
         return cq.Workplane(obj=moved)
     elif name == "print_wire_gland_cap":
-        # Rotate cap so its flat outer +X face lies on Z = 0 print bed
+        # Rotate cap so its flat outer +X face lies on Z = 0 print bed (inner compression tongue faces +Z up)
         rotated = solid.rotate((0, 0, 0), (0, 1, 0), 90.0)
         bb = rotated.BoundingBox()
         moved = rotated.translate((-bb.xmin, -bb.ymin, -bb.zmin))
         return cq.Workplane(obj=moved)
     else:
-        # Battery box already sits flat on Z = 0
+        # Battery box sits flat on Z = 0 floor; all gussets & gland hood have 45-deg support-free slopes
         bb = solid.BoundingBox()
         moved = solid.translate((-bb.xmin, -bb.ymin, -bb.zmin))
         return cq.Workplane(obj=moved)
@@ -870,7 +882,7 @@ def build_viewer_dims() -> list[dict[str, Any]]:
 
 
 def export_all(asm: cq.Assembly) -> None:
-    """Export STEP assembly, pre-oriented printable STLs, combined build plate, and viewer JSON."""
+    """Export STEP assembly, pre-oriented printable STLs, H2D build plates, and viewer JSON."""
     os.makedirs(OUT, exist_ok=True)
     os.makedirs(STEP_DIR, exist_ok=True)
     os.makedirs(STL_DIR, exist_ok=True)
@@ -888,9 +900,8 @@ def export_all(asm: cq.Assembly) -> None:
     with open(os.path.join(VIEWER_DIR, "dims-master.json"), "w") as f:
         json.dump(build_viewer_dims(), f, indent=2)
 
-    # 3. Export Pre-Oriented Printable STLs + Check against Bambu P1P (256x256) & H2D (350x320) beds
-    print("== Exported Pre-Oriented Printable STLs (Support-Free) ==")
-    plate_solids = []
+    # 3. Export Pre-Oriented Printable STLs + Build H2D Plates via plates.py
+    print(f"== Exported Pre-Oriented Printable STLs (Bambu Lab H2D {BED_H2D[0]:.0f}x{BED_H2D[1]:.0f}x{BED_H2D[2]:.0f} mm) ==")
     for child in asm.children:
         if not child.name.startswith("print_"):
             continue
@@ -899,22 +910,11 @@ def export_all(asm: cq.Assembly) -> None:
         cq.exporters.export(oriented, stl_path)
         bb = oriented.val().BoundingBox()
         dx, dy, dz = bb.xlen, bb.ylen, bb.zlen
-        p1p_ok = "PASS (P1P 256mm & H2D 350mm)" if (dx <= 256 and dy <= 256 and dz <= 256) else "H2D only"
-        print(f"  {child.name:24s} -> {dx:6.1f} x {dy:6.1f} x {dz:6.1f} mm  [{p1p_ok}]")
+        h2d_ok = "PASS (H2D 350x320)" if (dx <= BED_H2D[0] and dy <= BED_H2D[1] and dz <= BED_H2D[2]) else "EXCEEDS"
+        print(f"  {child.name:24s} -> {dx:6.1f} x {dy:6.1f} x {dz:6.1f} mm  [{h2d_ok}]")
 
-        # Position on combined build plate (fits within 250 x 240 mm -> prints in 1 plate on both P1P & H2D!)
-        if child.name == "print_battery_box":
-            plate_solids.append(oriented.val().translate((0.0, 0.0, 0.0)))
-        elif child.name == "print_overhang_lid":
-            plate_solids.append(oriented.val().translate((0.0, 92.0, 0.0)))
-        elif child.name == "print_wire_gland_cap":
-            plate_solids.append(oriented.val().translate((105.0, 198.0, 0.0)))
-
-    plate_compound = cq.Compound.makeCompound(plate_solids)
-    plate_path = os.path.join(STL_DIR, "plate_01_all_parts.stl")
-    cq.exporters.export(plate_compound, plate_path)
-    pbb = plate_compound.BoundingBox()
-    print(f"  {'plate_01_all_parts':24s} -> {pbb.xlen:6.1f} x {pbb.ylen:6.1f} x {pbb.zlen:6.1f} mm  [PASS (1-plate build on P1P & H2D)]")
+    import plates
+    plates.build_h2d_plates(STL_DIR)
 
 
 if __name__ == "__main__":

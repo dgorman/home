@@ -242,6 +242,90 @@ def render_cross_section(path: str) -> None:
     print("wrote", path)
 
 
+def render_h2d_plate(path: str) -> None:
+    """Render a 2-panel Bambu Lab H2D (350 x 320 mm) Build Plate visual guide (3D Iso on Bed + 2D Footprint Map)."""
+    import plates
+
+    fig = plt.figure(figsize=(15, 7.2), dpi=130)
+    fig.patch.set_facecolor("white")
+
+    # --- Panel 1: 3D Isometric View of `plate_h2d_all_in_one.stl` on the 350 x 320 mm H2D Bed ---
+    ax1 = fig.add_subplot(1, 2, 1, projection="3d")
+    ax1.set_title("Bambu Lab H2D (350 × 320 mm Bed) — Single-Plate All-in-One Layout", fontsize=11, fontweight="bold", pad=10)
+
+    # Draw 350 x 320 mm H2D build plate border & 50 mm grid lines at Z = 0 (avoids 3D painter's sort overlap)
+    ax1.plot([0, 350, 350, 0, 0], [0, 0, 320, 320, 0], [0, 0, 0, 0, 0], color="#1e293b", lw=2.2)
+    for gx in range(50, 350, 50):
+        ax1.plot([gx, gx], [0, 320], [0, 0], color="#94a3b8", lw=0.6, ls=":")
+    for gy in range(50, 320, 50):
+        ax1.plot([0, 350], [gy, gy], [0, 0], color="#94a3b8", lw=0.6, ls=":")
+
+    # Center the 271 x 192.9 mm layout on the 350 x 320 mm H2D bed: offset = (39.5, 63.5)
+    off_x, off_y = 39.5, 63.5
+    part_specs = [
+        ("print_battery_box.stl", (off_x + 0.0, off_y + 0.0), (0.85, 0.33, 0.12, 1.0)),
+        ("print_overhang_lid.stl", (off_x + 8.0, off_y + 94.0), (0.28, 0.33, 0.39, 1.0)),
+        ("print_wire_gland_cap.stl", (off_x + 249.0, off_y + 123.0), (0.94, 0.45, 0.18, 1.0)),
+    ]
+    for fn, (px, py), rgba in part_specs:
+        raw_tris = plates.translate(plates.normalise(plates.read_stl(os.path.join(box.STL_DIR, fn))), px, py, 0.0)
+        tri = np.array(raw_tris, dtype=float)
+        n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+        n /= np.linalg.norm(n, axis=1, keepdims=True) + 1e-9
+        shade = 0.55 + 0.45 * np.clip(n @ LIGHT, 0.0, 1.0)
+        base = np.array(rgba)
+        c = np.tile(base, (len(tri), 1))
+        c[:, :3] *= shade[:, None]
+        ax1.add_collection3d(Poly3DCollection(tri, facecolors=c, edgecolors="none", linewidths=0))
+
+    ax1.set_xlim(-10, 360)
+    ax1.set_ylim(-10, 330)
+    ax1.set_zlim(0, 180)
+    ax1.set_box_aspect((370, 340, 180), zoom=1.08)
+    ax1.view_init(elev=28, azim=-58)
+    ax1.set_proj_type("ortho")
+    ax1.set_axis_off()
+
+    # --- Panel 2: 2D Top-Down H2D Build Plate Footprint Map & Slicer Settings ---
+    ax2 = fig.add_subplot(1, 2, 2)
+    ax2.set_title("H2D Bed Map (350 × 320 mm) — 100% Support-Free Orientations", fontsize=11, fontweight="bold", pad=10)
+    ax2.add_patch(Polygon([(0, 0), (350, 0), (350, 320), (0, 320)], closed=True, facecolor="#1f242b", edgecolor="#0f172a", lw=2.0))
+
+    # Grid lines every 50 mm on the H2D bed
+    for gx in range(50, 350, 50):
+        ax2.plot([gx, gx], [0, 320], color="#334155", lw=0.7, ls="--")
+    for gy in range(50, 320, 50):
+        ax2.plot([0, 350], [gy, gy], color="#334155", lw=0.7, ls="--")
+
+    # Part 1: Battery Box (249 x 80 x 160 mm)
+    bx0, by0 = off_x, off_y
+    ax2.add_patch(Polygon([(bx0, by0), (bx0 + 249, by0), (bx0 + 249, by0 + 80), (bx0, by0 + 80)], closed=True, facecolor="#ea580c", edgecolor="#fdba74", lw=1.6, alpha=0.9))
+    ax2.text(bx0 + 124.5, by0 + 40, "1. print_battery_box.stl\n249.0 × 80.0 × 160.0 mm\n(Floor flat on z=0 · 45° gussets & hood · 0 supports)", ha="center", va="center", color="white", fontsize=8.5, fontweight="bold")
+
+    # Part 2: Overhang Lid (233 x 98.9 x 41.6 mm)
+    lx0, ly0 = off_x + 8.0, off_y + 94.0
+    ax2.add_patch(Polygon([(lx0, ly0), (lx0 + 233, ly0), (lx0 + 233, ly0 + 98.9), (lx0, ly0 + 98.9)], closed=True, facecolor="#475569", edgecolor="#cbd5e1", lw=1.6, alpha=0.92))
+    ax2.text(lx0 + 116.5, ly0 + 49.5, "2. print_overhang_lid.stl\n233.0 × 98.9 × 41.6 mm\n(Upside-down on sloped roof z=0 · Parallel ceiling z=6.0 · 0 supports)", ha="center", va="center", color="white", fontsize=8.5, fontweight="bold")
+
+    # Part 3: 10AWG Wire Gland Cap (22 x 40 x 8.5 mm)
+    cx0, cy0 = off_x + 249.0, off_y + 123.0
+    ax2.add_patch(Polygon([(cx0, cy0), (cx0 + 22, cy0), (cx0 + 22, cy0 + 40), (cx0, cy0 + 40)], closed=True, facecolor="#f97316", edgecolor="#fed7aa", lw=1.5, alpha=0.95))
+    ax2.annotate("3. print_wire_gland_cap.stl\n22.0 × 40.0 × 8.5 mm\n(Outer face on z=0)", xy=(cx0 + 11, cy0 + 40), xytext=(cx0 - 45, cy0 + 95),
+                 arrowprops=dict(arrowstyle="->", lw=1.4, color="#fb923c"), color="#fed7aa", fontsize=8.5, fontweight="bold")
+
+    ax2.text(175, 18, "Bambu Lab H2D Build Plate: 350 × 320 mm (Packed Envelope: 271 × 193 mm · +79 mm X / +127 mm Y Margin)", ha="center", va="center", color="#94a3b8", fontsize=8.5, fontweight="bold")
+    ax2.set_xlim(-10, 360)
+    ax2.set_ylim(-10, 330)
+    ax2.set_aspect("equal")
+    ax2.set_xlabel("H2D Bed X (mm)")
+    ax2.set_ylabel("H2D Bed Y (mm)")
+
+    fig.tight_layout()
+    fig.savefig(path, facecolor="white")
+    plt.close(fig)
+    print("wrote", path)
+
+
 if __name__ == "__main__":
     os.makedirs(box.RENDERS_DIR, exist_ok=True)
     asm = box.build_assembly()
@@ -279,3 +363,4 @@ if __name__ == "__main__":
         title="Rear Mounting View: 4× 3.0 mm Cedar-Wall Drainage Standoffs, Upper Drop-On Keyholes & Lower #10 Screw Holes",
     )
     render_cross_section(os.path.join(box.RENDERS_DIR, "cross-section-drip.png"))
+    render_h2d_plate(os.path.join(box.RENDERS_DIR, "h2d-print-plate.png"))

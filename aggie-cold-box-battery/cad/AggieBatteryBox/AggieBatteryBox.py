@@ -29,14 +29,14 @@ DIVIDER_T_X: float = 4.0            # 4.0 mm battery cradle divider rib (X = 158
 DIVIDER_H_Z: float = 40.0           # 40.0 mm tall above floor (Z = 5.0 .. 45.0)
 WIRE_BAY_W_X: float = 42.0          # 42.0 mm dedicated excess wire & fuse bay (X = 162.0 .. 204.0)
 INNER_DEPTH_Y: float = BATT_WID_Y + 2.0 * BATT_CLEAR_XY  # 67.0 mm (Y = 5.0 .. 72.0)
-OVERHEAD_WIRE_H_Z: float = 35.0     # 35.0 mm clear headroom above F2 terminals (Z = 127.0 .. 162.0)
+OVERHEAD_WIRE_H_Z: float = 33.0     # 33.0 mm clear headroom above F2 terminals (Z = 127.0 .. 160.0)
 
 BOX_WIDTH_X: float = WALL_T + BATT_BAY_W_X + DIVIDER_T_X + WIRE_BAY_W_X + WALL_T  # 209.0 mm
 BOX_DEPTH_Y: float = WALL_T + INNER_DEPTH_Y + WALL_T                              # 77.0 mm
 BOX_SHOULDER_Z: float = 152.0       # Outer wall shoulder height where lid collar seats
-SPLASH_LIP_H_Z: float = 10.0        # 10.0 mm tall raised inner labyrinth splash lip
+SPLASH_LIP_H_Z: float = 8.0         # 8.0 mm tall raised inner labyrinth splash lip
 SPLASH_LIP_STEP: float = 2.2        # 2.2 mm outer step-in (lip thickness = 2.8 mm)
-BOX_TOTAL_H_Z: float = BOX_SHOULDER_Z + SPLASH_LIP_H_Z                            # 162.0 mm
+BOX_TOTAL_H_Z: float = BOX_SHOULDER_Z + SPLASH_LIP_H_Z                            # 160.0 mm
 
 # Rear Planter-Wall Drainage Standoffs & Side Mounting Flanges
 STANDOFF_DEPTH_Y: float = 3.0       # 3.0 mm drainage/airflow gap behind box (Y = -3.0 .. 0.0)
@@ -481,14 +481,20 @@ def build_battery_box_component(
             adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
         )
 
-    # 6. 2x Internal Zip-Tie Anchor Bridges on Back Wall of Wiring Bay (X: 176..190, Y: 5..11, Z: 65 & 110)
+    # 6. 2x Internal 45-deg Support-Free Zip-Tie Anchor Bridges on Back Wall of Wiring Bay (X: 176..190, Z: 65 & 110)
     for tz in (65.0, 110.0):
-        add_box_feature(
-            comp, 176.0, WALL_T, tz - 6.0, 14.0, 6.0, 12.0,
+        b_pts = [
+            (176.0, WALL_T, tz - 12.0),
+            (176.0, WALL_T + 6.0, tz - 6.0),
+            (176.0, WALL_T + 6.0, tz + 6.0),
+            (176.0, WALL_T, tz + 12.0),
+        ]
+        add_polygon_extrusion(
+            comp, "x", 176.0, 14.0, b_pts,
             adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
         )
         add_box_feature(
-            comp, 180.0, WALL_T, tz - 7.0, 6.0, 4.0, 14.0,
+            comp, 180.0, WALL_T, tz - 13.0, 6.0, 4.0, 26.0,
             adsk.fusion.FeatureOperations.CutFeatureOperation, box,
         )
 
@@ -508,13 +514,22 @@ def build_battery_box_component(
             comp, fx0, -STANDOFF_DEPTH_Y, 0.0, FLANGE_W_X, FLANGE_T_Y, FLANGE_H_Z,
             adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
         )
-        # 2x Structural Gussets per flange (Z: 0..6 and Z: 62..68, Y: 5..17)
+        # Bottom Gusset (Z: 0..6) + Mid Gusset with 45-deg support-free lower bevel (Z: 50..68)
         gx0 = wall_x - 12.0 if side_sign < 0 else wall_x
-        for gz in (0.0, 62.0):
-            add_box_feature(
-                comp, gx0, WALL_T, gz, 12.0, 12.0, 6.0,
-                adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
-            )
+        add_box_feature(
+            comp, gx0, WALL_T, 0.0, 12.0, 12.0, 6.0,
+            adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
+        )
+        mid_g_pts = [
+            (gx0, WALL_T, 50.0),
+            (gx0, WALL_T + 12.0, 62.0),
+            (gx0, WALL_T + 12.0, 68.0),
+            (gx0, WALL_T, 68.0),
+        ]
+        add_polygon_extrusion(
+            comp, "x", gx0, 12.0, mid_g_pts,
+            adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
+        )
 
         # Lower #10 wood-screw through-hole + front counterbore (Z = 28.0) and Upper Keyhole (Z = 105.0 & 96.0)
         cut_cylinders_on_plane(
@@ -544,29 +559,18 @@ def build_battery_box_component(
             adsk.fusion.FeatureOperations.CutFeatureOperation, box,
         )
 
-    # 9. Right-Side 2x 10 AWG Wire Gland Boss + 45-deg Support-Free Chamfer + 45-deg Upper Rain Hood
+    # 9. Right-Side 2x 10 AWG Wire Gland Boss + 45-deg Support-Free Lower Chamfer & 45-deg Upper Rain Hood
     y_boss0 = GLAND_CENTER_Y - GLAND_BOSS_W_Y / 2.0  # 24.0 mm
-    boss_world_pts = [
+    boss_and_hood_pts = [
         (BOX_WIDTH_X, y_boss0, 6.0),
         (BOX_WIDTH_X + GLAND_BOSS_DX, y_boss0, 15.0),
         (BOX_WIDTH_X + GLAND_BOSS_DX, y_boss0, 37.0),
-        (BOX_WIDTH_X, y_boss0, 37.0),
+        (BOX_WIDTH_X + GLAND_HOOD_DX, y_boss0, 44.0),
+        (BOX_WIDTH_X + GLAND_HOOD_DX, y_boss0, 47.0),
+        (BOX_WIDTH_X, y_boss0, 63.0),
     ]
     add_polygon_extrusion(
-        comp, "y", y_boss0, GLAND_BOSS_W_Y, boss_world_pts,
-        adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
-    )
-
-    hood_w_y = GLAND_BOSS_W_Y + 8.0  # 48.0 mm
-    y_hood0 = GLAND_CENTER_Y - hood_w_y / 2.0  # 20.0 mm
-    hood_world_pts = [
-        (BOX_WIDTH_X, y_hood0, 37.0),
-        (BOX_WIDTH_X + GLAND_HOOD_DX, y_hood0, 37.0),
-        (BOX_WIDTH_X + GLAND_HOOD_DX, y_hood0, 41.0),
-        (BOX_WIDTH_X, y_hood0, 55.0),
-    ]
-    add_polygon_extrusion(
-        comp, "y", y_hood0, hood_w_y, hood_world_pts,
+        comp, "y", y_boss0, GLAND_BOSS_W_Y, boss_and_hood_pts,
         adsk.fusion.FeatureOperations.JoinFeatureOperation, box,
     )
 
@@ -653,13 +657,21 @@ def build_overhang_lid_component(
         adsk.fusion.FeatureOperations.CutFeatureOperation, lid,
     )
 
-    # 3. Cut upper inner labyrinth cavity around the raised splash lip (X: 1.6..207.4, Y: -0.6..75.4, Z: 152.5..163.0)
+    # 3. Cut upper inner labyrinth cavity around the raised splash lip with ceiling PARALLEL to the 8-deg sloped roof
     up_x0 = SPLASH_LIP_STEP - LID_COLLAR_CLEAR
     up_y0 = -LID_COLLAR_CLEAR
     up_w = (BOX_WIDTH_X - 2.0 * SPLASH_LIP_STEP) + 2.0 * LID_COLLAR_CLEAR
-    up_d = (BOX_DEPTH_Y - SPLASH_LIP_STEP) + 2.0 * LID_COLLAR_CLEAR
-    add_box_feature(
-        comp, up_x0, up_y0, BOX_SHOULDER_Z + 0.5, up_w, up_d, LID_CEIL_Z - (BOX_SHOULDER_Z + 0.5),
+    up_y1 = BOX_DEPTH_Y - SPLASH_LIP_STEP + LID_COLLAR_CLEAR
+    z_ceil_back = LID_ROOF_BACK_Z + ((up_y0 - LID_BACK_Y0) / LID_DEPTH_Y) * (LID_ROOF_FRONT_Z - LID_ROOF_BACK_Z) - 6.0
+    z_ceil_front = LID_ROOF_BACK_Z + ((up_y1 - LID_BACK_Y0) / LID_DEPTH_Y) * (LID_ROOF_FRONT_Z - LID_ROOF_BACK_Z) - 6.0
+    ceil_world_pts = [
+        (up_x0, up_y0, BOX_SHOULDER_Z + 0.5),
+        (up_x0, up_y1, BOX_SHOULDER_Z + 0.5),
+        (up_x0, up_y1, z_ceil_front),
+        (up_x0, up_y0, z_ceil_back),
+    ]
+    add_polygon_extrusion(
+        comp, "x", up_x0, up_w, ceil_world_pts,
         adsk.fusion.FeatureOperations.CutFeatureOperation, lid,
     )
 

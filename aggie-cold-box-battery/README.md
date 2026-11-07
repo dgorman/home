@@ -47,19 +47,28 @@ You can open and review the parametric assembly in **Autodesk Fusion 360** in ei
 
 ---
 
-## 3. 3D Printing Guide & Pre-Oriented STLs (`stl/`)
+## 3. Bambu Lab H2D (`350 × 320 × 325 mm`) Print Plates & STLs (`stl/`)
 
-All three printed parts are **100% support-free** (`≤ 45°` overhangs) and fit on **both** the Bambu Lab **P1P/P1S (`256 × 256 × 256 mm`)** and **H2D (`350 × 320 × 325 mm`)** — either individually or all together on a single build plate!
+![Bambu Lab H2D Build Plate Layout](renders/h2d-print-plate.png)
 
-| STL File | Print Bed Footprint (`X × Y × Z`) | Orientation on Bed | Notes |
+All three parts are **100% support-free** (`≤ 45°` overhangs, verified by [`cad/plates.py`](cad/plates.py)) and pre-oriented flat on `Z = 0` for the **Bambu Lab H2D (`350 × 320 × 325 mm` bed)** — load directly into Bambu Studio and slice without rotating or enabling supports:
+
+### H2D Build Plates (Ready to Slice)
+| H2D Plate File | Footprint on H2D Bed (`X × Y × Z`) | H2D Bed Margin | What Is on the Plate |
 |---|---|---|---|
-| [`stl/print_battery_box.stl`](stl/print_battery_box.stl) | `249.0 × 80.0 × 162.0 mm` | Upright on flat floor (`Z = 0`) | 0 supports; side flanges & rear standoffs rest on bed; gland boss has 45° bottom chamfer |
-| [`stl/print_overhang_lid.stl`](stl/print_overhang_lid.stl) | `233.0 × 98.9 × 41.6 mm` | Upside-down on flat sloped roof | 0 supports; skirt walls, drip groove & labyrinth collar print upward cleanly |
-| [`stl/print_wire_gland_cap.stl`](stl/print_wire_gland_cap.stl) | `22.0 × 40.0 × 8.5 mm` | Flat on outer face (`+X` down) | 0 supports; inner compression tongue faces up |
-| [`stl/plate_01_all_parts.stl`](stl/plate_01_all_parts.stl) | `249.0 × 238.0 × 162.0 mm` | All 3 parts packed on 1 bed | Single-plate print on both Bambu P1P (`256²`) and H2D (`350×320`) |
+| **[`stl/plate_h2d_all_in_one.stl`](stl/plate_h2d_all_in_one.stl)** | `271.0 × 192.9 × 160.0 mm` | `+79 mm X`, `+127 mm Y` | **Complete 1-plate print:** Battery Box + Overhang Drip Lid + 2× 10AWG Gland Cap |
+| **[`stl/plate_h2d_01_box_and_gland.stl`](stl/plate_h2d_01_box_and_gland.stl)** | `283.0 × 80.0 × 160.0 mm` | `+67 mm X`, `+240 mm Y` | **Two-color Option (Plate 1):** Battery Box + 2× 10AWG Gland Cap (e.g., Orange PETG/ASA) |
+| **[`stl/plate_h2d_02_overhang_lid.stl`](stl/plate_h2d_02_overhang_lid.stl)** | `233.0 × 98.9 × 41.6 mm` | `+117 mm X`, `+221 mm Y` | **Two-color Option (Plate 2):** Sloped Overhang Drip Lid (e.g., Dark Slate ASA) |
+
+### Individual Pre-Oriented Part STLs
+| Part File | Print Bed Footprint (`X × Y × Z`) | Bed Contact (`Z = 0`) | Support-Free Orientation Details |
+|---|---|---|---|
+| **[`stl/print_battery_box.stl`](stl/print_battery_box.stl)** | `249.0 × 80.0 × 160.0 mm` | `16,796 mm²` | Upright on flat floor (`Z = 0`). Side mounting flanges and rear standoffs start on the bed; mid-wall flange gussets, internal zip-tie bridges, and the 10AWG gland rain hood all use `45°` support-free bevels. |
+| **[`stl/print_overhang_lid.stl`](stl/print_overhang_lid.stl)** | `233.0 × 98.9 × 41.6 mm` | `22,111 mm²` | Flipped upside-down onto its flat sloped outer roof (`Z = 0`). The inner ceiling (`Z = 6.0 mm`) is parallel to the sloped roof so the H2D prints a flat `6.0 mm` solid roof slab with zero bridging or stair-stepping, then grows the labyrinth collar and undercut drip groove straight up. |
+| **[`stl/print_wire_gland_cap.stl`](stl/print_wire_gland_cap.stl)** | `22.0 × 40.0 × 8.5 mm` | `721 mm²` | Flat on its outer face (`Z = 0`), with the M4 counterbores and inner compression tongue facing upward. |
 
 - **Recommended Filament:** **ASA** or **PETG** (UV- and weather-resistant for outdoor snow/sun exposure)
-- **Print Settings:** `0.20 mm` layer height, **4 wall loops**, **5 top/bottom shell layers**, **25% gyroid infill**
+- **Bambu Studio H2D Settings:** `0.4 mm` nozzle, `0.20 mm` layer height, **4 wall loops**, **5 top/bottom shell layers**, **25% gyroid infill**, **Supports: OFF**, **Outer Brim: 5 mm** on the box and lid.
 
 ---
 
