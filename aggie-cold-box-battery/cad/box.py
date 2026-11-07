@@ -55,12 +55,12 @@ BED_H2D: tuple[float, float, float] = (350.0, 320.0, 325.0)
 # 1. PARAMETRIC DIMENSIONS (ALL VALUES IN MILLIMETERS)
 # ==============================================================================
 
-# Mighty Max 12V 10Ah SLA Battery (ML10-12)
-BATT_LEN_X: float = 151.0           # 5.94 in length
-BATT_WID_Y: float = 65.0            # 2.56 in width/depth
-BATT_CASE_H_Z: float = 111.0        # 4.37 in case height
-BATT_TOTAL_H_Z: float = 119.0       # 4.69 in total height over F2 terminals
-BATT_CLEAR_XY: float = 1.0          # 1.0 mm per-side pocket clearance
+# Mighty Max 12V 10Ah SLA Battery (ML10-12: 5.94 x 2.56 x 4.37 in case, 4.69 in over F2 terminals)
+BATT_LEN_X: float = 151.0           # 5.94 in (150.9 mm) nominal length
+BATT_WID_Y: float = 65.0            # 2.56 in (65.0 mm) nominal width/depth
+BATT_CASE_H_Z: float = 111.0        # 4.37 in (111.0 mm) case height
+BATT_TOTAL_H_Z: float = 119.0       # 4.69 in (119.0 mm) total height over F2 terminals
+BATT_CLEAR_XY: float = 2.5          # 2.5 mm per-side (5.0 mm total) clearance for SLA top-lip tolerance & print shrinkage
 
 # Enclosure Box Structural Envelope (Flat Z = 0 Build-Plate Bottom + Heavy 10 mm Thick Floor)
 WALL_T: float = 5.0                 # 5.0 mm heavy-duty outdoor wall thickness
@@ -68,15 +68,15 @@ FLOOR_T: float = 10.0               # 10.0 mm extra-thick structural floor slab 
 FLOOR_RIB_H: float = 3.0            # 3.0 mm raised floor ribs under battery (Z = 10.0 .. 13.0 dry air gap)
 BATT_Z0: float = FLOOR_T + FLOOR_RIB_H  # 13.0 mm battery resting elevation
 
-BATT_BAY_W_X: float = BATT_LEN_X + 2.0 * BATT_CLEAR_XY  # 153.0 mm (X = 5.0 .. 158.0)
-DIVIDER_T_X: float = 4.0            # 4.0 mm battery cradle divider rib (X = 158.0 .. 162.0)
+BATT_BAY_W_X: float = BATT_LEN_X + 2.0 * BATT_CLEAR_XY  # 156.0 mm (X = 5.0 .. 161.0)
+DIVIDER_T_X: float = 4.0            # 4.0 mm battery cradle divider rib (X = 161.0 .. 165.0)
 DIVIDER_H_Z: float = 40.0           # 40.0 mm tall above floor (Z = 10.0 .. 50.0)
-WIRE_BAY_W_X: float = 42.0          # 42.0 mm dedicated excess wire & fuse bay (X = 162.0 .. 204.0)
-INNER_DEPTH_Y: float = BATT_WID_Y + 2.0 * BATT_CLEAR_XY  # 67.0 mm (Y = 5.0 .. 72.0)
+WIRE_BAY_W_X: float = 42.0          # 42.0 mm dedicated excess wire & fuse bay (X = 165.0 .. 207.0)
+INNER_DEPTH_Y: float = BATT_WID_Y + 2.0 * BATT_CLEAR_XY  # 70.0 mm (Y = 5.0 .. 75.0)
 OVERHEAD_WIRE_H_Z: float = 33.0     # 33.0 mm clear headroom above F2 terminals (Z = 132.0 .. 165.0)
 
-BOX_WIDTH_X: float = WALL_T + BATT_BAY_W_X + DIVIDER_T_X + WIRE_BAY_W_X + WALL_T  # 209.0 mm
-BOX_DEPTH_Y: float = WALL_T + INNER_DEPTH_Y + WALL_T                              # 77.0 mm
+BOX_WIDTH_X: float = WALL_T + BATT_BAY_W_X + DIVIDER_T_X + WIRE_BAY_W_X + WALL_T  # 212.0 mm
+BOX_DEPTH_Y: float = WALL_T + INNER_DEPTH_Y + WALL_T                              # 80.0 mm
 BOX_SHOULDER_Z: float = 157.0       # Outer wall shoulder height where lid collar seats
 SPLASH_LIP_H_Z: float = 8.0         # 8.0 mm tall raised inner labyrinth splash lip (Z = 157.0 .. 165.0)
 SPLASH_LIP_STEP: float = 2.2        # 2.2 mm outer step-in (lip thickness = 2.8 mm)
@@ -87,7 +87,7 @@ STANDOFF_DEPTH_Y: float = 3.0       # 3.0 mm drainage/airflow gap behind box (Y 
 STANDOFF_W_X: float = 10.0          # 10.0 mm wide vertical standoff ribs
 STANDOFF_TOP_Z: float = 141.0       # Ends 2.0 mm below lid skirt (Z = 143.0)
 
-FLANGE_W_X: float = 20.0            # 20.0 mm wide left/right mounting ears (X = -20..0, 209..229)
+FLANGE_W_X: float = 18.0            # 18.0 mm wide left/right mounting ears (total span = 248.0 mm, fits P1P & H2D!)
 FLANGE_T_Y: float = STANDOFF_DEPTH_Y + WALL_T  # 8.0 mm thick solid flange (Y = -3.0 .. 5.0)
 FLANGE_Z0: float = 0.0              # Flush with the Z = 0.0 mm floor for 100% flat build-plate printing!
 FLANGE_TOP_Z: float = 135.0         # Z = 0.0 .. +135.0 mm
@@ -101,24 +101,24 @@ M4_CLEAR_DIA: float = 4.5           # M4 clearance hole (mm)
 M4_CBORE_DIA: float = 8.6           # M4 button-head counterbore diameter (mm)
 M4_INSERT_BORE_DIA: float = 5.6     # McMaster 94180A353 M4 tapered heat-set insert bore
 LID_M4_Z: float = 150.0             # Side M4 lid locking screw elevation
-LID_M4_Y: float = 38.5              # Centered on box depth (77.0 / 2)
+LID_M4_Y: float = BOX_DEPTH_Y / 2.0 # 40.0 mm (centered on box depth)
 
 # Dual Large 2x 10 AWG Wire Holes through Right Wall (Primary Hole + Spare Hole of Same Size)
 WIRE_10AWG_OD: float = 4.8          # Insulated 10 AWG wire jacket OD (~4.8 mm)
 WIRE_GLAND_HOLE_DIA: float = 12.5   # Large 12.5 mm (~1/2") hole sized to take 2x 10 AWG wires together
-WIRE_HOLE_PRIMARY_Y: float = 27.0   # Primary 2x 10 AWG hole Y center (mm)
-WIRE_HOLE_SPARE_Y: float = 51.0     # Spare 2x 10 AWG hole Y center right next to it (24.0 mm spacing)
+WIRE_HOLE_PRIMARY_Y: float = 28.0   # Primary 2x 10 AWG hole Y center (mm)
+WIRE_HOLE_SPARE_Y: float = 52.0     # Spare 2x 10 AWG hole Y center right next to it (24.0 mm spacing)
 WIRE_EXIT_CENTER_Z: float = 33.0    # Low on right wall of wiring bay (Z = 33.0 mm, 23 mm above the 10 mm floor)
 
 # Weatherproof Overhang Lid (Sloped Shed Roof + Parallel Ceiling + Eaves + Undercut Drip Groove)
-LID_OVERHANG_SIDE_X: float = 12.0   # 12.0 mm overhang left (X = -12.0) and right (X = 221.0)
-LID_OVERHANG_FRONT_Y: float = 14.0  # 14.0 mm overhang front (Y = 91.0)
+LID_OVERHANG_SIDE_X: float = 12.0   # 12.0 mm overhang left (X = -12.0) and right (X = 224.0)
+LID_OVERHANG_FRONT_Y: float = 14.0  # 14.0 mm overhang front (Y = 94.0)
 LID_BACK_Y0: float = -STANDOFF_DEPTH_Y  # -3.0 mm (flush against cedar planter wall)
-LID_FRONT_Y1: float = BOX_DEPTH_Y + LID_OVERHANG_FRONT_Y  # 91.0 mm
+LID_FRONT_Y1: float = BOX_DEPTH_Y + LID_OVERHANG_FRONT_Y  # 94.0 mm
 LID_LEFT_X0: float = -LID_OVERHANG_SIDE_X                 # -12.0 mm
-LID_RIGHT_X1: float = BOX_WIDTH_X + LID_OVERHANG_SIDE_X   # 221.0 mm
-LID_WIDTH_X: float = LID_RIGHT_X1 - LID_LEFT_X0           # 233.0 mm
-LID_DEPTH_Y: float = LID_FRONT_Y1 - LID_BACK_Y0           # 94.0 mm
+LID_RIGHT_X1: float = BOX_WIDTH_X + LID_OVERHANG_SIDE_X   # 224.0 mm
+LID_WIDTH_X: float = LID_RIGHT_X1 - LID_LEFT_X0           # 236.0 mm
+LID_DEPTH_Y: float = LID_FRONT_Y1 - LID_BACK_Y0           # 97.0 mm
 
 LID_SKIRT_Z0: float = 143.0         # Bottom of outer drip skirt (22 mm below Z = 165 rim)
 LID_ROOF_FRONT_Z: float = 172.0     # Top of roof at front eave (Y = 91.0 mm)
